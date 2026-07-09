@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Runlist — BuySmart</title>
+<link rel="stylesheet" href="shared/app.css">
+<link rel="stylesheet" href="shared/settings.css">
+<link rel="stylesheet" href="shared/contact-panel.css">
+<link rel="stylesheet" href="shared/date-picker.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif;}
+.root.main-area{height:calc(100vh - 64px);min-height:0;overflow:hidden;display:flex;flex-direction:column;position:relative;}
+@media (max-width:640px){ .root.main-area{height:auto;min-height:0;overflow:visible;} }
+.set-page-head{flex-wrap:wrap;}
+</style>
+</head>
+<body>
+
+<div class="root main-area" id="root">
+  <div class="set-page-head">
+    <button class="tbtn" id="rl-cal-btn" data-tooltip="Date" aria-label="Date">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span id="rl-cal-label">Today</span>
+    </button>
+
+    <button class="tbtn" id="rl-loc-btn" onclick="openLocationPopup(event)" data-tooltip="Auction Location" aria-label="Auction Location">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span id="rl-loc-label">Search Auction</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+
+    <button class="tbtn tbtn-icon" id="rl-filter-btn" data-tooltip="Filter" aria-label="Filter" onclick="rlToggleFilterDrawer(event)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      <span class="tbtn-badge" id="rl-filter-badge" style="display:none;">0</span>
+    </button>
+
+    <div class="sp"></div>
+
+    <button class="tbtn tbtn-p add-btn" data-tooltip="Add asset" aria-label="Add asset" onclick="rlOpenAddModal()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 8C14 8.13261 13.9473 8.25979 13.8536 8.35355C13.7598 8.44732 13.6326 8.5 13.5 8.5H8.5V13.5C8.5 13.6326 8.44732 13.7598 8.35355 13.8536C8.25979 13.9473 8.13261 14 8 14C7.86739 14 7.74021 13.9473 7.64645 13.8536C7.55268 13.7598 7.5 13.6326 7.5 13.5V8.5H2.5C2.36739 8.5 2.24021 8.44732 2.14645 8.35355C2.05268 8.25979 2 8.13261 2 8C2 7.86739 2.05268 7.74021 2.14645 7.64645C2.24021 7.55268 2.36739 7.5 2.5 7.5H7.5V2.5C7.5 2.36739 7.55268 2.24021 7.64645 2.14645C7.74021 2.05268 7.86739 2 8 2C8.13261 2 8.25979 2.05268 8.35355 2.14645C8.44732 2.24021 8.5 2.36739 8.5 2.5V7.5H13.5C13.6326 7.5 13.7598 7.55268 13.8536 7.64645C13.9473 7.74021 14 7.86739 14 8Z" fill="currentColor"/></svg>
+    </button>
+
+    <button class="tbtn" id="rl-user-btn" data-tooltip="Assign users" aria-label="Assign users" onclick="openAddUserPopup(event)" style="min-width:32px;padding:0 8px;justify-content:center;">
+      <span id="rl-user-btn-inner" style="display:flex;align-items:center;"></span>
+    </button>
+
+    <button class="tbtn table-btn" data-tooltip="Layout settings" aria-label="Layout settings" onclick="openLayoutSettings()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>
+    </button>
+
+    <div class="kebab-outer" id="rl-kebab">
+      <button class="tbtn kebab-btn" onclick="toggleRunlistKebab(event)" data-tooltip="More" aria-label="More">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+      </button>
+      <div class="kebab-menu" id="rl-kebab-menu">
+        <button class="kebab-item" onclick="rlAction('Export')">Export</button>
+        <button class="kebab-item" onclick="rlAction('Print')">Print</button>
+        <button class="kebab-item" onclick="rlAction('Refresh')">Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="set-scroll">
+    <section class="set-section" style="padding:16px 0 0;">
+      <div class="table-wrap">
+        <div class="table-scroll">
+        <table>
+          <thead id="rl-thead"></thead>
+          <tbody id="rl-tbody"></tbody>
+        </table>
+        </div>
+      </div>
+      <div class="rl-empty" id="rl-empty" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <div class="rl-empty-title">Select an auction to view runlist</div>
+        <div class="rl-empty-sub">Click the <strong>Search Auction</strong> button above to pick an auction location.</div>
+      </div>
+      <div class="tfooter">
+        <div>Showing <strong id="rl-showing">0</strong> of <strong id="rl-total">0</strong></div>
+        <div class="pgn" id="rl-pgn"></div>
+        <div class="rows-per-page-wrap">
+          <span>Rows per page</span>
+          <select class="rows-select" id="rl-rows-select" onchange="rlChangeRowsPerPage(this.value)">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Location popup -->
+  <div class="assign-popup" id="rl-loc-popup" style="display:none;">
+    <div class="assign-popup-title">Location</div>
+    <div class="assign-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" id="rl-loc-search" placeholder="Search locations…" oninput="renderLocations(this.value)"/>
+    </div>
+    <div class="assign-list" id="rl-loc-list"></div>
+  </div>
+
+  <!-- Final Bid History modal -->
+  <div class="modal-backdrop modal-fullscreen-mobile" id="rl-bh-modal" onclick="if(event.target===this) rlCloseBidHistory()">
+    <div class="modal modal--xwide">
+      <div class="modal-header">
+        <div class="modal-title">Final Bid History</div>
+        <button class="modal-close" onclick="rlCloseBidHistory()">&#x2715;</button>
+      </div>
+      <div class="modal-body" style="padding:0;">
+        <div class="table-wrap" style="margin:0;border:none;border-radius:0;">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:60px;">No</th>
+                  <th style="width:120px;">Old Final Bid</th>
+                  <th style="width:120px;">New Final Bid</th>
+                  <th style="width:170px;">DateTime</th>
+                  <th style="width:170px;">Final Bid Change By</th>
+                  <th style="width:160px;">Change Type</th>
+                </tr>
+              </thead>
+              <tbody id="rl-bh-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layout Settings modal -->
+  <div class="modal-backdrop modal-fullscreen-mobile" id="rl-ls-modal" onclick="if(event.target===this)closeLayoutSettings()">
+    <div class="modal modal--xwide ls-modal">
+      <div class="modal-header">
+        <div class="modal-title">Layout Settings</div>
+        <button class="modal-close" onclick="closeLayoutSettings()">&#x2715;</button>
+      </div>
+      <div class="modal-body ls-body">
+        <div class="ls-left">
+          <div class="ls-list-head">Columns</div>
+          <div class="ls-col-list" id="ls-col-list"></div>
+        </div>
+        <div class="ls-right">
+          <div class="ls-right-card">
+            <div class="ls-tpl-label">Template</div>
+            <div class="ls-tpl-picker">
+              <button class="ls-tpl-btn" onclick="lsToggleTplMenu(event)">
+                <span id="ls-tpl-current">Default</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="ls-tpl-menu" id="ls-tpl-menu" style="display:none;"></div>
+            </div>
+            <div class="ls-chip-strip-wrap"><div class="ls-chip-strip" id="ls-chip-strip"></div></div>
+            <div class="ls-tpl-explainer">Drag columns using the grip to reorder. Toggle the green check to show or hide a column. Save to persist your arrangement, or create a new template.</div>
+            <div class="ls-newtpl" id="ls-newtpl">
+              <div class="ls-newtpl-title">Save as new template</div>
+              <input type="text" class="ls-newtpl-input" id="ls-newtpl-input" placeholder="Template name" maxlength="40" oninput="lsNewTplValidate()" onkeydown="if(event.key==='Enter'&&!document.getElementById('ls-newtpl-save').disabled){lsNewTplSave();}else if(event.key==='Escape'){event.stopPropagation();lsNewTplClose();}"/>
+              <div class="ls-newtpl-error" id="ls-newtpl-error">Name already exists</div>
+              <div class="ls-newtpl-foot">
+                <button class="ls-newtpl-cancel" onclick="lsNewTplClose()">Cancel</button>
+                <button class="ls-newtpl-save" id="ls-newtpl-save" onclick="lsNewTplSave()" disabled>Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer ls-foot">
+        <button class="ls-delete" onclick="lsDeleteTemplate()">Delete</button>
+        <div style="flex:1"></div>
+        <button class="modal-cancel" onclick="closeLayoutSettings()">Cancel</button>
+        <div class="ls-saveas-wrap" id="ls-saveas-wrap">
+          <button class="modal-save ls-saveas-btn" onclick="lsToggleSaveAsMenu(event)">
+            Save as
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="ls-saveas-menu" id="ls-saveas-menu" style="display:none;">
+            <button class="ls-saveas-item" onclick="lsSaveCurrent();closeLsSaveAsMenu();">Save</button>
+            <button class="ls-saveas-item" onclick="closeLsSaveAsMenu();lsNewTplOpen();">New Template</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Runlist modal -->
+  <div class="modal-backdrop modal-fullscreen-mobile" id="rl-add-modal" onclick="if(event.target===this) rlCloseAddModal()">
+    <div class="modal modal--wide">
+      <div class="modal-header">
+        <div class="modal-title">Add Runlist</div>
+        <button class="modal-close" onclick="rlCloseAddModal()">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <div>
+          <label class="modal-field-label">Select Auction</label>
+          <div class="modal-field">
+            <select id="rl-add-auction" disabled>
+              <option>San Francisco</option>
+              <option>Los Angeles</option>
+              <option>New York City</option>
+              <option>Seattle</option>
+              <option>Chicago</option>
+              <option>Austin</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <div class="modal-section-title">Vehicle Identification</div>
+          <div class="modal-grid">
+            <div><label class="modal-field-label">Run No</label><div class="modal-field"><input type="text" id="rl-add-runNo" placeholder="Enter Run No"/></div></div>
+            <div><label class="modal-field-label">Vehicle VIN</label><div class="modal-field"><input type="text" id="rl-add-vin" placeholder="Enter Vehicle VIN"/></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="modal-section-title">Specifications</div>
+          <div class="modal-grid">
+            <div><label class="modal-field-label">Year</label><div class="modal-field"><input type="number" id="rl-add-year" placeholder="Enter Year"/></div></div>
+            <div><label class="modal-field-label">Make</label><div class="modal-field"><input type="text" id="rl-add-make" placeholder="Enter Make"/></div></div>
+            <div><label class="modal-field-label">Model</label><div class="modal-field"><input type="text" id="rl-add-model" placeholder="Enter Model"/></div></div>
+            <div><label class="modal-field-label">Trim</label><div class="modal-field"><input type="text" id="rl-add-trim" placeholder="Enter Trim"/></div></div>
+            <div><label class="modal-field-label">Transmission</label><div class="modal-field"><input type="text" id="rl-add-transmission" placeholder="Enter Transmission"/></div></div>
+            <div><label class="modal-field-label">Exterior Color</label><div class="modal-field"><input type="text" id="rl-add-color" placeholder="Enter Exterior Color"/></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="modal-section-title">Condition</div>
+          <label class="modal-field-label">Acquired Mileage</label>
+          <div class="modal-field"><input type="number" id="rl-add-mileage" placeholder="Enter Acquired Mileage"/></div>
+        </div>
+        <div>
+          <div class="modal-section-title">Additional Info</div>
+          <label class="modal-field-label">Announcement</label>
+          <div class="modal-field modal-field--textarea"><textarea id="rl-add-announcement" placeholder="Enter Announcement"></textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-cancel" onclick="rlCloseAddModal()">Cancel</button>
+        <button class="modal-save" onclick="rlSubmitAddModal()">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter drawer -->
+  <div class="fd-wrap" id="rl-filter-drawer" onclick="event.stopPropagation()">
+    <div class="fd-left">
+      <div class="fd-list" id="rl-fd-list"></div>
+      <div class="fd-foot">
+        <span class="fd-clear" onclick="rlClearAllFilters()">Clear all</span>
+        <span class="fd-foot-hint">Esc to close</span>
+      </div>
+    </div>
+    <div class="fd-right" id="rl-fd-right">
+      <div class="fd-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="rl-fd-search" placeholder="Search Filter" oninput="rlFilterRightPane(this.value)"/>
+      </div>
+      <div class="fd-opts" id="rl-fd-opts"></div>
+    </div>
+  </div>
+
+  <!-- Assign users popup -->
+  <div class="assign-popup" id="rl-user-popup" style="display:none;">
+    <div class="assign-popup-title">Assign users</div>
+    <div class="assign-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" id="rl-user-search" placeholder="Search team…" oninput="renderAddUserList(this.value)"/>
+    </div>
+    <div class="assign-list" id="rl-user-list"></div>
+  </div>
+</div>
+
+<script src="shared/notifications.js"></script>
+<script src="shared/contact-panel.js"></script>
+<script src="shared/date-picker.js"></script>
+<script src="shared/leads-comms.js"></script>
+<script src="shared/shell.js"></script>
+<script>
+BuySmartShell.init({ page: 'runlist', title: 'Runlist' });
+
+/* ── Runlist toolbar state + handlers ─────────────────────────────────── */
+const LOCATIONS = [
+  { id:'sf',  name:'San Francisco',  city:'CA', abbr:'SF', color:'#1E6BFF' },
+  { id:'la',  name:'Los Angeles',    city:'CA', abbr:'LA', color:'#22C88A' },
+  { id:'nyc', name:'New York City',  city:'NY', abbr:'NY', color:'#F5A623' },
+  { id:'sea', name:'Seattle',        city:'WA', abbr:'SE', color:'#2DD4BF' },
+  { id:'chi', name:'Chicago',        city:'IL', abbr:'CH', color:'#C4B5FD' },
+  { id:'atx', name:'Austin',         city:'TX', abbr:'AT', color:'#EF476F' },
+];
+
+let rlCurrentLocation = (function(){
+  try {
+    const saved = localStorage.getItem('buysmart:rl:location');
+    return (saved && LOCATIONS.find(function(l){ return l.id === saved; })) ? saved : null;
+  } catch(e){ return null; }
+})();
+let rlCurrentDate = ''; // filled on first calendar open; label starts as "Today"
+
+/* Calendar — reuse CCDatePicker */
+document.getElementById('rl-cal-btn').addEventListener('click', function(){
+  CCDatePicker.open({
+    anchor: this,
+    value: rlCurrentDate,
+    onChange: function(v){
+      rlCurrentDate = v;
+      document.getElementById('rl-cal-label').textContent = v;
+    }
+  });
+});
+
+/* Location popup */
+function openLocationPopup(e){
+  e.stopPropagation();
+  const popup = document.getElementById('rl-loc-popup');
+  const search = document.getElementById('rl-loc-search');
+  search.value = '';
+  renderLocations('');
+  popup.style.display = 'block';
+  // .assign-popup is position:fixed — compute viewport-relative coords
+  const rect = e.currentTarget.getBoundingClientRect();
+  const popupWidth = 260;
+  let top  = rect.bottom + 6;
+  let left = rect.left;
+  if(left < 8) left = 8;
+  popup.style.top  = top  + 'px';
+  popup.style.left = left + 'px';
+  popup.style.width = popupWidth + 'px';
+  setTimeout(function(){ search.focus(); }, 30);
+}
+
+function renderLocations(filter){
+  const q = (filter || '').trim().toLowerCase();
+  const list = document.getElementById('rl-loc-list');
+  const matches = LOCATIONS.filter(function(l){ return l.name.toLowerCase().includes(q); });
+  if(!matches.length){
+    list.innerHTML = '<div class="assign-list-empty">No locations found</div>';
+    return;
+  }
+  list.innerHTML = matches.map(function(l){
+    const selected = (l.id === rlCurrentLocation) ? ' style="background:rgba(79,124,255,.08);"' : '';
+    return '<div class="assign-user" onclick="pickLocation(\'' + l.id + '\')"' + selected + '>' +
+             '<div class="assign-user-av" style="background:' + l.color + ';">' + l.abbr + '</div>' +
+             '<div><div class="assign-user-name">' + l.name + '</div>' +
+                  (l.city ? '<div class="assign-user-role">' + l.city + '</div>' : '') +
+             '</div>' +
+           '</div>';
+  }).join('');
+}
+
+function pickLocation(id){
+  const loc = LOCATIONS.find(function(l){ return l.id === id; });
+  if(!loc) return;
+  rlCurrentLocation = id;
+  try { localStorage.setItem('buysmart:rl:location', id); } catch(e){}
+  document.getElementById('rl-loc-label').textContent = loc.name;
+  closeLocationPopup();
+  rlRender();
+}
+
+function closeLocationPopup(){
+  document.getElementById('rl-loc-popup').style.display = 'none';
+}
+
+/* ── Runlist data — 5 vehicles per auction × 6 auctions = 30 rows ── */
+const AUCTION_LOCATIONS = ['San Francisco','Los Angeles','New York City','Seattle','Chicago','Austin'];
+const VEHICLE_TEMPLATES = [
+  { active:true, finalBid:12800, year:2019, make:'HYUNDAI',   model:'TUCSON',         trim:'SEL',              mileage:75208, vin:'KM8J33AL8KU938681', conditions:['Hail damage'],                              hasInfo:true,  bid:14350, bidTag:'Main',
+    mds:37, mmr:14350, vrank:11512, vrankPos:3, vrankTotal:9,  priceRank:7073,  priceRankPos:1, priceRankTotal:9,
+    carfax:'5 Service History Records, At Least 1 Open Recall, CARFAX 1-Owner Vehicle, Personal Vehicle, Last Owned in Texas', ownerDays:2430, reconCost:1500 },
+  { active:true, finalBid:9500,  year:2016, make:'LINCOLN',   model:'MKX',            trim:'Reserve',          mileage:98615, vin:'2LMPJ8LR1GBL35216', conditions:['Prior lease'],                              hasInfo:false, bid:10764, bidTag:'Main',
+    mds:42, mmr:8000,  vrank:10764, vrankPos:4, vrankTotal:13, priceRank:3827,  priceRankPos:1, priceRankTotal:13,
+    carfax:'Regular Oil Changes, 30 Service History Records, At Least 1 Open Recall, 2 Previous Owners, Types of Owners: Personal Lease, Personal', ownerDays:2950, reconCost:900 },
+  { active:true, finalBid:18100, year:2019, make:'RAM',       model:'1500',           trim:'Classic Lonestar', mileage:77557, vin:'1C6RR6LT0KS529274', conditions:['Structural alterations'],                   hasInfo:true,  bid:19556, bidTag:'VRank',
+    mds:58, mmr:18850, vrank:19556, vrankPos:2, vrankTotal:8,  priceRank:12068, priceRankPos:1, priceRankTotal:8,
+    carfax:'4 Service History Records, CARFAX 1-Owner Vehicle, Personal Vehicle, Last Owned in Texas, 18 Detailed Records Available', ownerDays:2675, reconCost:2300 },
+  { active:true, finalBid:13000, year:2018, make:'HONDA',     model:'Civic',          trim:'EX-L',             mileage:49267, vin:'JHMFC1F73JX016339', conditions:['Hail damage','Prior lease','Title absent'], hasInfo:false, bid:14200, bidTag:'Main',
+    mds:29, mmr:14200, vrank:13645, vrankPos:3, vrankTotal:9,  priceRank:10577, priceRankPos:1, priceRankTotal:9,
+    carfax:'16 Service History Records, 2 Previous Owners, Personal Vehicle, Last Owned in Texas, 32 Detailed Records Available', ownerDays:2765, reconCost:1600 },
+  { active:true, finalBid:16400, year:2020, make:'TOYOTA',    model:'RAV4',           trim:'XLE',              mileage:44120, vin:'2T3P1RFV0LC072148', conditions:['Prior lease'],                              hasInfo:false, bid:17200, bidTag:'Main',
+    mds:34, mmr:17250, vrank:15980, vrankPos:2, vrankTotal:11, priceRank:8940,  priceRankPos:1, priceRankTotal:11,
+    carfax:'8 Service History Records, CARFAX 1-Owner Vehicle, Personal Vehicle, Last Owned in Texas', ownerDays:1820, reconCost:1100 },
+  { active:true, finalBid:22300, year:2021, make:'FORD',      model:'F-150',          trim:'XLT SuperCrew',    mileage:38940, vin:'1FTFW1E86MFA12345', conditions:[],                                           hasInfo:true,  bid:23100, bidTag:'VRank',
+    mds:48, mmr:22800, vrank:21440, vrankPos:1, vrankTotal:6,  priceRank:18500, priceRankPos:1, priceRankTotal:6,
+    carfax:'12 Service History Records, CARFAX 1-Owner Vehicle, Personal Vehicle, Regular Oil Changes, 24 Detailed Records Available', ownerDays:1240, reconCost:850 },
+  { active:true, finalBid:11500, year:2017, make:'CHEVROLET', model:'Silverado 1500', trim:'LT',               mileage:88410, vin:'3GCUKREC5HG438521', conditions:['Hail damage'],                              hasInfo:false, bid:12500, bidTag:'Main',
+    mds:51, mmr:12200, vrank:11800, vrankPos:5, vrankTotal:12, priceRank:4230,  priceRankPos:2, priceRankTotal:12,
+    carfax:'22 Service History Records, 3 Previous Owners, Personal Vehicle, Last Owned in Texas', ownerDays:3120, reconCost:1400 },
+];
+
+function rlFormatDate(d){
+  const pad = function(n){ return String(n).padStart(2,'0'); };
+  const h24 = d.getHours();
+  const hh = h24 % 12 || 12;
+  const ampm = h24 < 12 ? 'AM' : 'PM';
+  return pad(d.getMonth()+1) + '/' + pad(d.getDate()) + '/' + d.getFullYear() + ' ' + pad(hh) + ':' + pad(d.getMinutes()) + ' ' + ampm;
+}
+
+function rlSeedBidHistory(row){
+  const now = Date.now();
+  const bootstrap = { no:3, oldBid:0, newBid:Math.round(row.finalBid * 1.05), dateTime:rlFormatDate(new Date(now - 3*24*60*60*1000)), changedBy:'Amin Hussain', changeType:'Automatic' };
+  const mid       = { no:2, oldBid:bootstrap.newBid, newBid:Math.round(row.finalBid * 1.02), dateTime:rlFormatDate(new Date(now - 1*24*60*60*1000)), changedBy:'Amin Hussain', changeType:'Manual' };
+  const latest    = { no:1, oldBid:mid.newBid, newBid:row.finalBid, dateTime:rlFormatDate(new Date(now - 4*60*60*1000)), changedBy:'Amin Hussain', changeType:'Manual' };
+  return [latest, mid, bootstrap];
+}
+
+function seedRunlist(){
+  const rows = [];
+  let n = 1;
+  AUCTION_LOCATIONS.forEach(function(loc){
+    for(let i = 0; i < 5; i++){
+      const t = VEHICLE_TEMPLATES[i % VEHICLE_TEMPLATES.length];
+      const row = Object.assign({}, t, {
+        srno: n,
+        location: loc,
+        vin: t.vin.slice(0, -2) + String(n).padStart(2, '0'),
+      });
+      row.finalBidHistory = rlSeedBidHistory(row);
+      rows.push(row);
+      n++;
+    }
+  });
+  return rows;
+}
+
+const RUNLIST_DATA = seedRunlist();
+const RUNLIST_DATA_ORIGINAL = RUNLIST_DATA.slice();
+
+const CAR_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13l2-5a2 2 0 0 1 2-1h10a2 2 0 0 1 2 1l2 5"/><path d="M3 13v4a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-1h10v1a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-4"/><circle cx="7" cy="15" r="1"/><circle cx="17" cy="15" r="1"/></svg>';
+const COPY_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const WRENCH_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>';
+const INFO_SVG = '<svg viewBox="0 0 24 24" fill="var(--ac)" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" fill="var(--ac)" stroke="none"/><line x1="12" y1="16" x2="12" y2="12" stroke="#fff"/><line x1="12" y1="8" x2="12.01" y2="8" stroke="#fff"/></svg>';
+const CLOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 15 14"/></svg>';
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ── Column registry — cell renderers keyed by column id ─────────────── */
+function rlCellVehicle(r){
+  const conds = r.conditions.length ? '<div class="veh-conds">' + esc(r.conditions.join(', ')) + '</div>' : '';
+  const infoBtn = r.hasInfo ? '<button class="ic-btn" title="Info" onclick="event.stopPropagation();rlAction(\'Info\')">' + INFO_SVG + '</button>' : '';
+  return '<td data-col="vehicle"><div class="name-cell"><div class="veh-thumb">' + CAR_ICON_SVG + '</div><div><div class="nm">' + esc(r.year + ', ' + r.make + ', ' + r.model + ', ' + r.trim + ', ' + r.mileage + ', ' + r.vin) +
+    '<span class="name-actions">' +
+      '<button class="ic-btn" title="Copy VIN" onclick="event.stopPropagation();rlCopyVin(\'' + r.vin + '\')">' + COPY_SVG + '</button>' +
+      '<button class="ic-btn" title="Diagnostics" onclick="event.stopPropagation();rlAction(\'Diagnostics\')">' + WRENCH_SVG + '</button>' +
+      infoBtn +
+    '</span></div>' + conds + '</div></div></td>';
+}
+function rlCellBid(r){
+  const bidTagClass = r.bidTag === 'VRank' ? 'bdg-vrank' : 'bdg-main';
+  return '<td data-col="bid"><div class="bid-stack"><div class="bid-value">' + r.bid + '</div><span class="bdg ' + bidTagClass + '">' + r.bidTag + '</span></div></td>';
+}
+function rlCellRank(r, key){
+  const val = r[key], pos = r[key+'Pos'], tot = r[key+'Total'];
+  return '<td data-col="' + key + '"><div class="bid-stack"><div class="rank-value">' + val + '</div><span class="bdg bdg-main">' + pos + ' of ' + tot + '</span></div></td>';
+}
+
+const RL_COLS = {
+  srno:      { label:'SrNo',                   sortKey:'srno',      width:60,  cell:function(r){ return '<td data-col="srno">' + r.srno + '</td>'; } },
+  status:    { label:'Status',                 sortKey:'status',    width:110, cell:function(r){ return '<td data-col="status"><div class="tog' + (r.active ? '' : ' off') + '" onclick="event.stopPropagation();rlToggleActive(' + r.srno + ',this)"></div></td>'; } },
+  finalBid:  { label:'Final BID',              sortKey:'finalBid',  width:150, cell:function(r){ return '<td data-col="finalBid"><div class="bh-cell"><input type="text" class="cell-input" value="' + r.finalBid + '" onchange="rlUpdateFinalBid(' + r.srno + ',this.value)" onclick="event.stopPropagation()"/><button class="tbtn tbtn-p bh-btn" onclick="event.stopPropagation();rlOpenBidHistory(' + r.srno + ')">Bid History</button></div></td>'; } },
+  vehicle:   { label:'Vehicle Name',           sortKey:'vehicle',   width:220, cell:rlCellVehicle },
+  location:  { label:'Location',               sortKey:'location',  width:140, cell:function(r){ return '<td data-col="location">' + esc(r.location) + '</td>'; } },
+  reconCost: { label:'Recon Cost',             sortKey:'reconCost', width:150, cell:function(r){ return '<td data-col="reconCost"><div class="bh-cell"><div class="rc-value">' + (r.reconCost != null ? r.reconCost : '—') + '</div><button class="tbtn rc-btn" onclick="event.stopPropagation();rlAction(\'Damage Input\')">Damage Input</button></div></td>'; } },
+  bid:       { label:'BID',                    sortKey:'bid',       width:100, cell:rlCellBid },
+  mds:       { label:'MDS',                    sortKey:'mds',       width:80,  cell:function(r){ return '<td data-col="mds">' + r.mds + '</td>'; } },
+  mmr:       { label:'MMR',                    sortKey:'mmr',       width:90,  cell:function(r){ return '<td data-col="mmr">' + r.mmr + '</td>'; } },
+  vrank:     { label:'VRank',                  sortKey:'vrank',     width:90,  cell:function(r){ return rlCellRank(r,'vrank'); } },
+  priceRank: { label:'Price Rank',             sortKey:'priceRank', width:110, cell:function(r){ return rlCellRank(r,'priceRank'); } },
+  carfax:    { label:'Carfax',                 sortKey:'carfax',    width:340, cell:function(r){ return '<td data-col="carfax" class="carfax-cell">' + esc(r.carfax) + '</td>'; } },
+  ownerDays: { label:'LastOwnerOwnershipDays', sortKey:'ownerDays', width:220, cell:function(r){ return '<td data-col="ownerDays">' + r.ownerDays + '</td>'; } },
+};
+const RL_DEFAULT_COL_ORDER = Object.keys(RL_COLS);
+
+function rlVisibleColumnKeys(){
+  const rows = document.querySelectorAll('#ls-col-list .ls-col-row');
+  if(!rows.length) return RL_DEFAULT_COL_ORDER.slice();
+  const out = [];
+  rows.forEach(function(row){
+    const check = row.querySelector('.ls-check');
+    if(check && check.classList.contains('on')) out.push(row.dataset.col);
+  });
+  return out.length ? out : RL_DEFAULT_COL_ORDER.slice();
+}
+
+function rlBuildThead(){
+  const keys = rlVisibleColumnKeys();
+  const html = '<tr>' + keys.map(function(k){
+    const def = RL_COLS[k];
+    return '<th data-col="' + k + '" style="width:' + def.width + 'px;" data-sort="' + def.sortKey + '" onclick="rlSort(\'' + k + '\')"><div class="thi">' + def.label + '<span class="sort-arrow"></span></div></th>';
+  }).join('') + '</tr>';
+  document.getElementById('rl-thead').innerHTML = html;
+  if(rlSortCol){
+    const th = document.querySelector('#rl-thead th[data-col="' + rlSortCol + '"]');
+    if(th) th.classList.add(rlSortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+  }
+}
+
+function rlRenderRow(r){
+  const keys = rlVisibleColumnKeys();
+  return '<tr>' + keys.map(function(k){ return RL_COLS[k].cell(r); }).join('') + '</tr>';
+}
+
+function rlRender(){
+  const emptyEl = document.getElementById('rl-empty');
+  const tableEl = document.querySelector('.set-section .table-wrap');
+  const footerEl = document.querySelector('.set-section .tfooter');
+  if(!rlCurrentLocation){
+    if(emptyEl) emptyEl.style.display = 'flex';
+    if(tableEl) tableEl.style.display = 'none';
+    if(footerEl) footerEl.style.display = 'none';
+    return;
+  }
+  if(emptyEl) emptyEl.style.display = 'none';
+  if(tableEl) tableEl.style.display = '';
+  if(footerEl) footerEl.style.display = '';
+  rlBuildThead();
+  const perPage = rlPerPage;
+  const filtered = rlFilteredData();
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+  if(rlPage > totalPages) rlPage = totalPages;
+  const start = (rlPage - 1) * perPage;
+  const slice = filtered.slice(start, start + perPage);
+  document.getElementById('rl-tbody').innerHTML = slice.map(rlRenderRow).join('');
+  rlTotalRows = filtered.length;
+  rlUpdateFooter();
+}
+
+function rlToggleActive(srno, el){
+  const r = RUNLIST_DATA.find(function(x){ return x.srno === srno; });
+  if(!r) return;
+  r.active = !r.active;
+  el.classList.toggle('off', !r.active);
+}
+
+function rlUpdateFinalBid(srno, val){
+  const r = RUNLIST_DATA.find(function(x){ return x.srno === srno; });
+  if(!r) return;
+  const n = parseInt(String(val).replace(/[^0-9]/g,''), 10);
+  const newBid = isNaN(n) ? 0 : n;
+  if(newBid === r.finalBid) return;
+  const oldBid = r.finalBid;
+  r.finalBid = newBid;
+  if(!Array.isArray(r.finalBidHistory)) r.finalBidHistory = [];
+  const nextNo = (r.finalBidHistory[0] && r.finalBidHistory[0].no || 0) + 1;
+  r.finalBidHistory.unshift({ no: nextNo, oldBid: oldBid, newBid: newBid, dateTime: rlFormatDate(new Date()), changedBy: 'Amin Hussain', changeType: 'Manual' });
+}
+
+function rlOpenBidHistory(srno){
+  const row = RUNLIST_DATA.find(function(r){ return r.srno === srno; });
+  if(!row) return;
+  const tbody = document.getElementById('rl-bh-tbody');
+  tbody.innerHTML = (row.finalBidHistory || []).map(function(h, i){
+    const badge = h.changeType === 'Automatic' ? 'bdg-auto' : 'bdg-main';
+    return '<tr>' +
+      '<td>' + (i + 1) + '</td>' +
+      '<td>' + h.oldBid + '</td>' +
+      '<td>' + h.newBid + '</td>' +
+      '<td>' + esc(h.dateTime) + '</td>' +
+      '<td>' + esc(h.changedBy) + '</td>' +
+      '<td><span class="bdg ' + badge + '">' + h.changeType + '</span></td>' +
+    '</tr>';
+  }).join('');
+  document.getElementById('rl-bh-modal').classList.add('open');
+}
+
+function rlCloseBidHistory(){
+  document.getElementById('rl-bh-modal').classList.remove('open');
+}
+
+function rlCopyVin(vin){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(vin).catch(function(){});
+  }
+  window.showNavToast('VIN copied', vin);
+}
+
+/* ── Table sort ─────────────────────────────────────────────────────── */
+let rlSortCol = null;
+let rlSortDir = null; // 'asc' | 'desc' | null
+
+function rlSortKey(row, col){
+  switch(col){
+    case 'srno':     return row.srno;
+    case 'status':   return row.active ? 1 : 0;
+    case 'finalBid': return row.finalBid;
+    case 'vehicle':  return row.year + ' ' + row.make + ' ' + row.model;
+    case 'location': return row.location;
+    case 'bid':      return row.bid;
+    case 'reconCost': return row.reconCost;
+    case 'mds':       return row.mds;
+    case 'mmr':       return row.mmr;
+    case 'vrank':     return row.vrank;
+    case 'priceRank': return row.priceRank;
+    case 'carfax':    return row.carfax;
+    case 'ownerDays': return row.ownerDays;
+    default:         return 0;
+  }
+}
+
+function rlSort(col){
+  if(rlSortCol === col){
+    if(rlSortDir === 'asc')       rlSortDir = 'desc';
+    else if(rlSortDir === 'desc'){ rlSortDir = null; rlSortCol = null; }
+    else                            rlSortDir = 'asc';
+  } else {
+    rlSortCol = col;
+    rlSortDir = 'asc';
+  }
+  document.querySelectorAll('#rl-thead th').forEach(function(th){
+    const isThis = th.getAttribute('data-col') === rlSortCol;
+    th.classList.toggle('sort-asc',  isThis && rlSortDir === 'asc');
+    th.classList.toggle('sort-desc', isThis && rlSortDir === 'desc');
+  });
+  if(rlSortCol === null){
+    RUNLIST_DATA.length = 0;
+    RUNLIST_DATA_ORIGINAL.forEach(function(r){ RUNLIST_DATA.push(r); });
+  } else {
+    const dir = rlSortDir === 'asc' ? 1 : -1;
+    RUNLIST_DATA.sort(function(a, b){
+      const va = rlSortKey(a, rlSortCol);
+      const vb = rlSortKey(b, rlSortCol);
+      if(va < vb) return -1 * dir;
+      if(va > vb) return  1 * dir;
+      return 0;
+    });
+  }
+  rlRender();
+}
+
+/* ── Table footer (count + pagination + rows-per-page) ───────────────── */
+let rlPage = 1;
+let rlPerPage = 10;
+let rlTotalRows = 0;
+
+function rlBuildPageList(total, current){
+  if(total <= 7) return Array.from({length: total}, function(_, i){ return i + 1; });
+  const pages = [1];
+  if(current > 3) pages.push('…');
+  const lo = Math.max(2, current - 1);
+  const hi = Math.min(total - 1, current + 1);
+  for(let i = lo; i <= hi; i++) pages.push(i);
+  if(current < total - 2) pages.push('…');
+  pages.push(total);
+  return pages;
+}
+
+function rlUpdateFooter(){
+  const total = rlTotalRows;
+  const perPage = rlPerPage;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  if(rlPage > totalPages) rlPage = totalPages;
+
+  const showing = document.getElementById('rl-showing');
+  const totalEl = document.getElementById('rl-total');
+  if(total === 0){
+    showing.textContent = '0';
+    totalEl.textContent = '0';
+  } else {
+    const start = (rlPage - 1) * perPage + 1;
+    const end   = Math.min(rlPage * perPage, total);
+    showing.textContent = start + '–' + end;
+    totalEl.textContent = total;
+  }
+
+  const pgn = document.getElementById('rl-pgn');
+  const btns = [];
+  btns.push('<button class="pb"' + (rlPage <= 1 ? ' disabled' : '') + ' onclick="rlGoToPage(' + (rlPage - 1) + ')" title="Previous">&#8249;</button>');
+  const pageList = rlBuildPageList(totalPages, rlPage);
+  pageList.forEach(function(p){
+    if(p === '…') btns.push('<span style="padding:0 4px;color:var(--mu);">…</span>');
+    else btns.push('<button class="pb ' + (p === rlPage ? 'on' : '') + '" onclick="rlGoToPage(' + p + ')">' + p + '</button>');
+  });
+  btns.push('<button class="pb"' + (rlPage >= totalPages ? ' disabled' : '') + ' onclick="rlGoToPage(' + (rlPage + 1) + ')" title="Next">&#8250;</button>');
+  pgn.innerHTML = btns.join('');
+}
+
+function rlGoToPage(p){
+  rlPage = p;
+  if(typeof rlRender === 'function') rlRender();
+  else rlUpdateFooter();
+}
+
+function rlChangeRowsPerPage(v){
+  rlPerPage = parseInt(v, 10) || 10;
+  rlPage = 1;
+  if(typeof rlRender === 'function') rlRender();
+  else rlUpdateFooter();
+}
+
+/* ── Layout Settings modal (drag-reorder + show/hide + templates) ────── */
+const GRIP_SVG = '<svg viewBox="0 0 8 14" fill="currentColor" aria-hidden="true"><circle cx="2" cy="2" r="1.2"/><circle cx="6" cy="2" r="1.2"/><circle cx="2" cy="7" r="1.2"/><circle cx="6" cy="7" r="1.2"/><circle cx="2" cy="12" r="1.2"/><circle cx="6" cy="12" r="1.2"/></svg>';
+const CHECK_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+let rlLayoutTemplates = [{id:1, name:'Default', cols:null}];
+let rlLayoutActiveId = 1;
+let rlLayoutCounter = 1;
+let lsDraggedRow = null;
+
+function rlLayoutStorageKey(){ return 'buysmart:rl:layout'; }
+
+function rlSaveLayoutsToStorage(){
+  try {
+    localStorage.setItem(rlLayoutStorageKey(), JSON.stringify({templates: rlLayoutTemplates, activeId: rlLayoutActiveId, counter: rlLayoutCounter}));
+  } catch(e){}
+}
+
+function rlLoadLayoutsFromStorage(){
+  try {
+    const raw = localStorage.getItem(rlLayoutStorageKey());
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    if(data && Array.isArray(data.templates) && data.templates.length){
+      rlLayoutTemplates = data.templates;
+      rlLayoutActiveId = data.activeId || rlLayoutTemplates[0].id;
+      rlLayoutCounter = data.counter || Math.max.apply(null, rlLayoutTemplates.map(function(t){ return t.id; }));
+    }
+  } catch(e){}
+}
+
+function rlSeedLSList(){
+  const list = document.getElementById('ls-col-list');
+  list.innerHTML = RL_DEFAULT_COL_ORDER.map(function(k){
+    const def = RL_COLS[k];
+    return '<div class="ls-col-row" data-col="' + k + '" ondragstart="lsDragStart(event)" ondragover="lsDragOver(event)" ondragleave="lsDragLeave(event)" ondrop="lsDrop(event)" ondragend="lsDragEnd(event)">' +
+      '<span class="ls-grip" onmousedown="lsGripDown(event)" onmouseup="lsGripUp(event)">' + GRIP_SVG + '</span>' +
+      '<span class="ls-col-name">' + def.label + '</span>' +
+      '<span class="ls-check on" onclick="toggleLSColumn(\'' + k + '\')">' + CHECK_SVG + '</span>' +
+    '</div>';
+  }).join('');
+  lsRenderChipStrip();
+}
+
+function lsRenderChipStrip(){
+  const strip = document.getElementById('ls-chip-strip');
+  if(!strip) return;
+  const keys = rlVisibleColumnKeys();
+  if(!keys.length){
+    strip.innerHTML = '<div class="ls-chip-empty">No columns visible — toggle one on to see it here.</div>';
+    return;
+  }
+  strip.innerHTML = keys.map(function(k){
+    const def = RL_COLS[k];
+    return '<div class="ls-chip">' + esc(def.label) + '</div>';
+  }).join('');
+}
+
+function lsReadCurrentColumns(){
+  const rows = document.querySelectorAll('#ls-col-list .ls-col-row');
+  const out = [];
+  rows.forEach(function(row){
+    const check = row.querySelector('.ls-check');
+    out.push({col: row.dataset.col, on: check && check.classList.contains('on')});
+  });
+  return out;
+}
+
+function lsApplyColumns(cols){
+  const list = document.getElementById('ls-col-list');
+  if(!list) return;
+  const byKey = {};
+  Array.from(list.children).forEach(function(row){ byKey[row.dataset.col] = row; });
+  cols.forEach(function(c){
+    const row = byKey[c.col];
+    if(!row) return;
+    list.appendChild(row);
+    const check = row.querySelector('.ls-check');
+    if(c.on) check.classList.add('on'); else check.classList.remove('on');
+    delete byKey[c.col];
+  });
+  // Append any newly-defined columns not in the saved template at the end (visible)
+  Object.keys(byKey).forEach(function(k){
+    list.appendChild(byKey[k]);
+    byKey[k].querySelector('.ls-check').classList.add('on');
+  });
+  lsRenderChipStrip();
+}
+
+function lsRenderTplMenu(){
+  const menu = document.getElementById('ls-tpl-menu');
+  menu.innerHTML = rlLayoutTemplates.map(function(t){
+    const selected = t.id === rlLayoutActiveId ? ' selected' : '';
+    return '<div class="ls-tpl-item' + selected + '" onclick="lsSelectTemplate(' + t.id + ')">' +
+      '<span>' + esc(t.name) + '</span>' +
+      '<span class="ls-tpl-item-check">&#10003;</span>' +
+    '</div>';
+  }).join('');
+  const cur = rlLayoutTemplates.find(function(t){ return t.id === rlLayoutActiveId; });
+  document.getElementById('ls-tpl-current').textContent = cur ? cur.name : 'Default';
+}
+
+function lsToggleTplMenu(e){
+  if(e) e.stopPropagation();
+  const menu = document.getElementById('ls-tpl-menu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+function lsSelectTemplate(id){
+  rlLayoutActiveId = id;
+  const tpl = rlLayoutTemplates.find(function(t){ return t.id === id; });
+  if(tpl && tpl.cols) lsApplyColumns(tpl.cols);
+  document.getElementById('ls-tpl-menu').style.display = 'none';
+  lsRenderTplMenu();
+  rlSaveLayoutsToStorage();
+  rlRender();
+}
+
+function openLayoutSettings(){
+  const modal = document.getElementById('rl-ls-modal');
+  if(!document.querySelector('#ls-col-list .ls-col-row')){
+    rlSeedLSList();
+    const active = rlLayoutTemplates.find(function(t){ return t.id === rlLayoutActiveId; });
+    if(active && active.cols) lsApplyColumns(active.cols);
+    rlRender();
+  }
+  lsRenderTplMenu();
+  modal.classList.add('open');
+}
+
+function closeLayoutSettings(){
+  document.getElementById('rl-ls-modal').classList.remove('open');
+  const menu = document.getElementById('ls-tpl-menu');
+  if(menu) menu.style.display = 'none';
+  closeLsSaveAsMenu();
+  lsNewTplClose();
+}
+
+function lsToggleSaveAsMenu(e){
+  if(e) e.stopPropagation();
+  const wrap = document.getElementById('ls-saveas-wrap');
+  const menu = document.getElementById('ls-saveas-menu');
+  const isOpen = menu.style.display === 'block';
+  menu.style.display = isOpen ? 'none' : 'block';
+  wrap.classList.toggle('open', !isOpen);
+}
+function closeLsSaveAsMenu(){
+  const wrap = document.getElementById('ls-saveas-wrap');
+  const menu = document.getElementById('ls-saveas-menu');
+  if(menu) menu.style.display = 'none';
+  if(wrap) wrap.classList.remove('open');
+}
+
+function toggleLSColumn(key){
+  const row = document.querySelector('#ls-col-list .ls-col-row[data-col="' + key + '"]');
+  if(!row) return;
+  row.querySelector('.ls-check').classList.toggle('on');
+  rlRender();
+  lsRenderChipStrip();
+}
+
+/* Grip-gated drag-and-drop */
+function lsGripDown(e){
+  const row = e.currentTarget.closest('.ls-col-row');
+  if(row) row.draggable = true;
+}
+function lsGripUp(e){
+  const row = e.currentTarget.closest('.ls-col-row');
+  if(row) row.draggable = false;
+}
+function lsDragStart(e){
+  lsDraggedRow = e.currentTarget;
+  lsDraggedRow.classList.add('dragging');
+  try { e.dataTransfer.effectAllowed = 'move'; } catch(err){}
+}
+function lsDragOver(e){
+  if(!lsDraggedRow) return;
+  e.preventDefault();
+  const row = e.currentTarget;
+  if(row === lsDraggedRow) return;
+  const rect = row.getBoundingClientRect();
+  const before = (e.clientY - rect.top) < rect.height / 2;
+  row.classList.toggle('drop-before', before);
+  row.classList.toggle('drop-after', !before);
+}
+function lsDragLeave(e){
+  e.currentTarget.classList.remove('drop-before','drop-after');
+}
+function lsClearDropIndicators(){
+  document.querySelectorAll('#ls-col-list .ls-col-row').forEach(function(r){
+    r.classList.remove('drop-before','drop-after');
+  });
+}
+function lsDrop(e){
+  if(!lsDraggedRow) return;
+  e.preventDefault();
+  const target = e.currentTarget;
+  if(target === lsDraggedRow){ lsClearDropIndicators(); return; }
+  const before = target.classList.contains('drop-before');
+  const list = document.getElementById('ls-col-list');
+  if(before) list.insertBefore(lsDraggedRow, target);
+  else       list.insertBefore(lsDraggedRow, target.nextSibling);
+  lsClearDropIndicators();
+  rlRender();
+  lsRenderChipStrip();
+}
+function lsDragEnd(){
+  if(lsDraggedRow) lsDraggedRow.classList.remove('dragging');
+  lsDraggedRow = null;
+  lsClearDropIndicators();
+  document.querySelectorAll('#ls-col-list .ls-col-row').forEach(function(r){ r.draggable = false; });
+}
+
+function lsSaveCurrent(){
+  const active = rlLayoutTemplates.find(function(t){ return t.id === rlLayoutActiveId; });
+  if(active){
+    active.cols = lsReadCurrentColumns();
+    rlSaveLayoutsToStorage();
+    window.showNavToast('Layout saved', active.name + ' template updated.');
+  }
+}
+
+function lsNewTplOpen(){
+  const dlg = document.getElementById('ls-newtpl');
+  const input = document.getElementById('ls-newtpl-input');
+  input.value = '';
+  input.classList.remove('error');
+  document.getElementById('ls-newtpl-error').classList.remove('show');
+  document.getElementById('ls-newtpl-save').disabled = true;
+  dlg.classList.add('open');
+  setTimeout(function(){ input.focus(); }, 30);
+}
+function lsNewTplClose(){
+  document.getElementById('ls-newtpl').classList.remove('open');
+}
+function lsNewTplValidate(){
+  const input = document.getElementById('ls-newtpl-input');
+  const err = document.getElementById('ls-newtpl-error');
+  const save = document.getElementById('ls-newtpl-save');
+  const name = input.value.trim();
+  const dup = !!name && rlLayoutTemplates.some(function(t){ return t.name.toLowerCase() === name.toLowerCase(); });
+  input.classList.toggle('error', dup);
+  err.classList.toggle('show', dup);
+  save.disabled = !name || dup;
+}
+function lsNewTplSave(){
+  const name = document.getElementById('ls-newtpl-input').value.trim();
+  if(!name) return;
+  if(rlLayoutTemplates.some(function(t){ return t.name.toLowerCase() === name.toLowerCase(); })) return;
+  rlLayoutCounter += 1;
+  const tpl = { id: rlLayoutCounter, name: name, cols: lsReadCurrentColumns() };
+  rlLayoutTemplates.push(tpl);
+  rlLayoutActiveId = tpl.id;
+  rlSaveLayoutsToStorage();
+  lsRenderTplMenu();
+  lsNewTplClose();
+  window.showNavToast('Template created', name + ' is now active.');
+}
+
+function lsDeleteTemplate(){
+  if(rlLayoutTemplates.length <= 1){
+    window.showNavToast('Cannot delete', 'At least one template must remain.');
+    return;
+  }
+  const active = rlLayoutTemplates.find(function(t){ return t.id === rlLayoutActiveId; });
+  if(!active) return;
+  if(!window.confirm('Delete template "' + active.name + '"? This cannot be undone.')) return;
+  const idx = rlLayoutTemplates.indexOf(active);
+  rlLayoutTemplates.splice(idx, 1);
+  const nextActive = rlLayoutTemplates[0];
+  rlLayoutActiveId = nextActive.id;
+  if(nextActive.cols) lsApplyColumns(nextActive.cols);
+  rlSaveLayoutsToStorage();
+  lsRenderTplMenu();
+  rlRender();
+  window.showNavToast('Template deleted', '"' + active.name + '" removed. Active: ' + nextActive.name + '.');
+}
+
+function lsResetDefault(){
+  const defaultCols = RL_DEFAULT_COL_ORDER.map(function(k){ return {col:k, on:true}; });
+  lsApplyColumns(defaultCols);
+  rlRender();
+  window.showNavToast('Layout reset', 'Default order restored.');
+}
+
+// Load saved templates on script boot + seed the ls-col-list so the active
+// template's arrangement takes effect on the very first rlRender() below.
+rlLoadLayoutsFromStorage();
+rlSeedLSList();
+const _rlBootActiveTpl = rlLayoutTemplates.find(function(t){ return t.id === rlLayoutActiveId; });
+if(_rlBootActiveTpl && _rlBootActiveTpl.cols) lsApplyColumns(_rlBootActiveTpl.cols);
+
+/* ── Add Runlist modal ─────────────────────────────────────────────── */
+function rlOpenAddModal(){
+  if(!rlCurrentLocation){
+    window.showNavToast('Select an auction first', 'Pick an auction location before adding a runlist.');
+    return;
+  }
+  const curLoc = LOCATIONS.find(function(l){ return l.id === rlCurrentLocation; });
+  const modal = document.getElementById('rl-add-modal');
+  ['rl-add-runNo','rl-add-vin','rl-add-year','rl-add-make','rl-add-model','rl-add-trim','rl-add-transmission','rl-add-color','rl-add-mileage','rl-add-announcement'].forEach(function(id){
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  document.getElementById('rl-add-auction').value = curLoc.name;
+  modal.classList.add('open');
+}
+function rlCloseAddModal(){
+  document.getElementById('rl-add-modal').classList.remove('open');
+}
+function rlSubmitAddModal(){
+  const $ = function(id){ return document.getElementById(id); };
+  const year   = parseInt($('rl-add-year').value, 10);
+  const make   = $('rl-add-make').value.trim();
+  const model  = $('rl-add-model').value.trim();
+  const vin    = $('rl-add-vin').value.trim();
+  if(!year || !make || !model || !vin){
+    window.showNavToast('Missing required fields', 'Year, Make, Model, and VIN are required.');
+    return;
+  }
+  const nextSrno = RUNLIST_DATA.length ? Math.max.apply(null, RUNLIST_DATA.map(function(r){ return r.srno; })) + 1 : 1;
+  const row = {
+    srno: nextSrno,
+    active: true,
+    finalBid: 0,
+    year: year,
+    make: make,
+    model: model,
+    trim: $('rl-add-trim').value.trim(),
+    mileage: parseInt($('rl-add-mileage').value, 10) || 0,
+    vin: vin,
+    conditions: [],
+    hasInfo: false,
+    location: (LOCATIONS.find(function(l){ return l.id === rlCurrentLocation; }) || {}).name || '',
+    bid: 0,
+    bidTag: 'Main',
+    mds: 0, mmr: 0,
+    vrank: 0, vrankPos: 0, vrankTotal: 0,
+    priceRank: 0, priceRankPos: 0, priceRankTotal: 0,
+    carfax: '',
+    ownerDays: 0,
+    runNo: $('rl-add-runNo').value.trim(),
+    transmission: $('rl-add-transmission').value.trim(),
+    exteriorColor: $('rl-add-color').value.trim(),
+    announcement: $('rl-add-announcement').value.trim(),
+  };
+  RUNLIST_DATA.push(row);
+  RUNLIST_DATA_ORIGINAL.push(row);
+  rlCloseAddModal();
+  rlRender();
+  window.showNavToast('Runlist added', year + ' ' + make + ' ' + model);
+}
+
+/* ── Filter drawer ─────────────────────────────────────────────────── */
+const RL_FILTER_CONFIG = [
+  { key:'status',     label:'Status',     type:'single', options:[{val:'active',label:'Active'},{val:'inactive',label:'Inactive'}] },
+  { key:'location',   label:'Location',   type:'multi',  source:'unique:location' },
+  { key:'conditions', label:'Conditions', type:'multi',  source:'unique:conditions' },
+  { key:'bidTag',     label:'BID Type',   type:'single', options:[{val:'Main',label:'Main'},{val:'VRank',label:'VRank'}] },
+  { key:'finalBid',   label:'Final BID',  type:'range' },
+  { key:'bid',        label:'BID',        type:'range' },
+  { key:'reconCost',  label:'Recon Cost', type:'range' },
+  { key:'mds',        label:'MDS',        type:'range' },
+  { key:'mmr',        label:'MMR',        type:'range' },
+  { key:'vrank',      label:'VRank',      type:'range' },
+  { key:'priceRank',  label:'Price Rank', type:'range' },
+  { key:'ownerDays',  label:'Owner Days', type:'range' },
+  { key:'carfax',     label:'Carfax',     type:'search' },
+];
+
+let rlActiveFilters = {}; // key → Set (single/multi) | {min,max} (range) | string (search)
+let rlActiveCatKey = null;
+let rlRightSearchQuery = '';
+
+function rlGetCatDef(key){ return RL_FILTER_CONFIG.find(function(c){ return c.key === key; }); }
+
+function rlGetCatOptions(key){
+  const def = rlGetCatDef(key);
+  if(!def) return [];
+  if(def.options) return def.options;
+  if(def.source === 'unique:location'){
+    const set = new Set(RUNLIST_DATA.map(function(r){ return r.location; }));
+    return Array.from(set).map(function(v){ return {val:v, label:v}; });
+  }
+  if(def.source === 'unique:conditions'){
+    const set = new Set();
+    RUNLIST_DATA.forEach(function(r){ (r.conditions||[]).forEach(function(c){ set.add(c); }); });
+    return Array.from(set).map(function(v){ return {val:v, label:v}; });
+  }
+  return [];
+}
+
+function rlCatSelectedCount(key){
+  const val = rlActiveFilters[key];
+  if(!val) return 0;
+  if(val instanceof Set) return val.size;
+  if(typeof val === 'string') return val ? 1 : 0;
+  if(typeof val === 'object'){
+    return (val.min != null && val.min !== '') || (val.max != null && val.max !== '') ? 1 : 0;
+  }
+  return 0;
+}
+
+function rlRowMatchesFilters(row){
+  // Toolbar location button — implicit filter (in addition to drawer filters)
+  if(rlCurrentLocation){
+    const loc = LOCATIONS.find(function(l){ return l.id === rlCurrentLocation; });
+    if(loc && row.location !== loc.name) return false;
+  }
+  for(const key in rlActiveFilters){
+    const def = rlGetCatDef(key);
+    if(!def) continue;
+    const val = rlActiveFilters[key];
+    if(def.type === 'single' || def.type === 'multi'){
+      if(!(val instanceof Set) || !val.size) continue;
+      if(key === 'status'){
+        const want = row.active ? 'active' : 'inactive';
+        if(!val.has(want)) return false;
+      } else if(key === 'conditions'){
+        const rowConds = row.conditions || [];
+        let any = false;
+        for(const c of val){ if(rowConds.indexOf(c) >= 0){ any = true; break; } }
+        if(!any) return false;
+      } else {
+        if(!val.has(row[key])) return false;
+      }
+    } else if(def.type === 'range'){
+      const min = val.min != null && val.min !== '' ? +val.min : -Infinity;
+      const max = val.max != null && val.max !== '' ? +val.max : Infinity;
+      const n = +row[key];
+      if(isNaN(n) || n < min || n > max) return false;
+    } else if(def.type === 'search'){
+      if(val && !(''+(row[key]||'')).toLowerCase().includes(val.toLowerCase())) return false;
+    }
+  }
+  return true;
+}
+
+function rlFilteredData(){ return RUNLIST_DATA.filter(rlRowMatchesFilters); }
+
+function rlOptionCount(key, testVal){
+  // Rows that would match if this category = only [testVal], plus all OTHER active filters.
+  const saved = rlActiveFilters[key];
+  rlActiveFilters[key] = new Set([testVal]);
+  const n = RUNLIST_DATA.filter(rlRowMatchesFilters).length;
+  if(saved === undefined) delete rlActiveFilters[key];
+  else rlActiveFilters[key] = saved;
+  return n;
+}
+
+function rlRenderFilterLeft(){
+  const list = document.getElementById('rl-fd-list');
+  list.innerHTML = RL_FILTER_CONFIG.map(function(c){
+    const count = rlCatSelectedCount(c.key);
+    const active = c.key === rlActiveCatKey ? ' active' : '';
+    const countPill = count > 0 ? '<span class="fd-cat-count">' + count + '</span>' : '';
+    return '<div class="fd-cat' + active + '" data-key="' + c.key + '" onclick="rlLockCategory(\'' + c.key + '\')">' +
+             '<span class="fd-cat-label">' + c.label + '</span>' + countPill +
+             '<span class="fd-cat-chev">&rsaquo;</span>' +
+           '</div>';
+  }).join('');
+}
+
+function rlRenderFilterRight(){
+  const right = document.getElementById('rl-fd-right');
+  const opts  = document.getElementById('rl-fd-opts');
+  const searchWrap = right.querySelector('.fd-search');
+  if(!rlActiveCatKey){ right.classList.remove('show'); return; }
+  right.classList.add('show');
+  const def = rlGetCatDef(rlActiveCatKey);
+  if(!def){ opts.innerHTML = ''; return; }
+
+  if(def.type === 'range'){
+    searchWrap.style.display = 'none';
+    const cur = rlActiveFilters[rlActiveCatKey] || {};
+    opts.innerHTML = '<div class="fd-range">' +
+      '<input type="number" placeholder="Min" value="' + (cur.min != null ? cur.min : '') + '" oninput="rlSetRange(\'' + rlActiveCatKey + '\',\'min\',this.value)"/>' +
+      '<span class="fd-range-dash">–</span>' +
+      '<input type="number" placeholder="Max" value="' + (cur.max != null ? cur.max : '') + '" oninput="rlSetRange(\'' + rlActiveCatKey + '\',\'max\',this.value)"/>' +
+    '</div>';
+    return;
+  }
+  if(def.type === 'search'){
+    searchWrap.style.display = 'none';
+    const cur = rlActiveFilters[rlActiveCatKey] || '';
+    opts.innerHTML = '<div class="fd-search-input">' +
+      '<input type="text" placeholder="Search ' + def.label + '…" value="' + esc(cur) + '" oninput="rlSetSearch(\'' + rlActiveCatKey + '\',this.value)"/>' +
+    '</div>';
+    return;
+  }
+
+  // single or multi — option rows
+  searchWrap.style.display = 'flex';
+  const q = (rlRightSearchQuery || '').toLowerCase();
+  const options = rlGetCatOptions(rlActiveCatKey).filter(function(o){ return o.label.toLowerCase().includes(q); });
+  const activeSet = rlActiveFilters[rlActiveCatKey] instanceof Set ? rlActiveFilters[rlActiveCatKey] : null;
+  const indicator = def.type === 'single' ? 'fp-radio' : 'fp-cb';
+  if(!options.length){
+    opts.innerHTML = '<div class="fd-empty">No options</div>';
+    return;
+  }
+  opts.innerHTML = options.map(function(o){
+    const chosen = activeSet && activeSet.has(o.val);
+    const count = rlOptionCount(rlActiveCatKey, o.val);
+    return '<div class="fd-opt' + (chosen ? ' chosen' : '') + '" data-val="' + esc(o.val) + '" onmousedown="event.preventDefault()" onclick="event.stopPropagation();rlToggleFilterValue(\'' + rlActiveCatKey + '\',this.dataset.val)">' +
+             '<div class="' + indicator + (chosen ? ' on' : '') + '"></div>' +
+             '<span class="fd-opt-label">' + esc(o.label) + '</span>' +
+             '<span class="fd-opt-count">' + count + '</span>' +
+           '</div>';
+  }).join('');
+}
+
+function rlLockCategory(key){
+  rlActiveCatKey = key;
+  rlRightSearchQuery = '';
+  const search = document.getElementById('rl-fd-search');
+  if(search) search.value = '';
+  rlRenderFilterLeft();
+  rlRenderFilterRight();
+}
+
+function rlFilterRightPane(q){
+  rlRightSearchQuery = q || '';
+  rlRenderFilterRight();
+}
+
+function rlToggleFilterValue(key, val){
+  const def = rlGetCatDef(key);
+  if(!def) return;
+  let cur = rlActiveFilters[key];
+  if(!(cur instanceof Set)) cur = new Set();
+  if(def.type === 'single'){
+    if(cur.has(val)) cur.delete(val); else { cur.clear(); cur.add(val); }
+  } else {
+    if(cur.has(val)) cur.delete(val); else cur.add(val);
+  }
+  if(!cur.size) delete rlActiveFilters[key];
+  else rlActiveFilters[key] = cur;
+  rlRenderFilterLeft();
+  rlRenderFilterRight();
+  rlUpdateFilterBadge();
+}
+
+function rlSetRange(key, which, val){
+  let cur = rlActiveFilters[key];
+  if(!cur || typeof cur !== 'object' || cur instanceof Set) cur = {};
+  cur[which] = val;
+  if((cur.min == null || cur.min === '') && (cur.max == null || cur.max === '')) delete rlActiveFilters[key];
+  else rlActiveFilters[key] = cur;
+  rlRenderFilterLeft();
+  rlUpdateFilterBadge();
+}
+
+function rlSetSearch(key, val){
+  if(val){ rlActiveFilters[key] = val; }
+  else { delete rlActiveFilters[key]; }
+  rlRenderFilterLeft();
+  rlUpdateFilterBadge();
+}
+
+function rlClearAllFilters(){
+  rlActiveFilters = {};
+  rlRenderFilterLeft();
+  rlRenderFilterRight();
+  rlUpdateFilterBadge();
+}
+
+function rlUpdateFilterBadge(){
+  let total = 0;
+  Object.keys(rlActiveFilters).forEach(function(k){ total += rlCatSelectedCount(k); });
+  const badge = document.getElementById('rl-filter-badge');
+  const btn = document.getElementById('rl-filter-btn');
+  if(total > 0){
+    badge.style.display = 'flex';
+    badge.textContent = total;
+    btn.classList.add('active-filter');
+  } else {
+    badge.style.display = 'none';
+    btn.classList.remove('active-filter');
+  }
+}
+
+function rlPositionFilterDrawer(){
+  const wrap = document.getElementById('rl-filter-drawer');
+  const btn = document.getElementById('rl-filter-btn');
+  if(!wrap || !btn) return;
+  const r = btn.getBoundingClientRect();
+  // width = fd-left (200) + fd-right (280) when right shown = 480; else 200.
+  const width = rlActiveCatKey ? 480 : 200;
+  let top = r.bottom + 6;
+  let left = r.left;
+  if(left + width > window.innerWidth - 8) left = window.innerWidth - width - 8;
+  if(left < 8) left = 8;
+  const maxHeight = window.innerHeight - top - 16;
+  wrap.style.top = top + 'px';
+  wrap.style.left = left + 'px';
+  wrap.style.maxHeight = maxHeight + 'px';
+}
+
+function rlToggleFilterDrawer(e){
+  if(e) e.stopPropagation();
+  const wrap = document.getElementById('rl-filter-drawer');
+  if(wrap.classList.contains('open')){ rlCloseFilterDrawer(); return; }
+  closeLocationPopup();
+  closeAddUserPopup();
+  closeRunlistKebab();
+  if(!rlActiveCatKey) rlActiveCatKey = RL_FILTER_CONFIG[0].key;
+  rlRightSearchQuery = '';
+  const search = document.getElementById('rl-fd-search');
+  if(search) search.value = '';
+  rlRenderFilterLeft();
+  rlRenderFilterRight();
+  wrap.classList.add('open');
+  rlPositionFilterDrawer();
+}
+
+function rlCloseFilterDrawer(){
+  const wrap = document.getElementById('rl-filter-drawer');
+  if(!wrap.classList.contains('open')) return;
+  wrap.classList.remove('open');
+  rlActiveCatKey = null;
+  rlRender();
+}
+
+window.addEventListener('resize', function(){
+  const wrap = document.getElementById('rl-filter-drawer');
+  if(wrap && wrap.classList.contains('open')) rlPositionFilterDrawer();
+});
+
+/* ── Assign users (multi-select popup + avatar stack) ────────────────── */
+let rlAssignees = []; // array of CCLeads.TEAM keys
+const USER_PLUS_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>';
+
+function getInitials(name){
+  return (name || '?').split(/\s+/).map(function(w){ return w[0]; }).slice(0, 2).join('').toUpperCase();
+}
+
+function refreshAddUserButton(){
+  const btn = document.getElementById('rl-user-btn');
+  const inner = document.getElementById('rl-user-btn-inner');
+  if(!rlAssignees.length){
+    btn.classList.remove('no-frame');
+    inner.innerHTML = USER_PLUS_SVG;
+    return;
+  }
+  btn.classList.add('no-frame');
+  const users = rlAssignees.map(function(k){ return CCLeads.TEAM.find(function(u){ return u.key === k; }); }).filter(Boolean);
+  const MAX = 2;
+  const shown = users.slice(0, MAX);
+  const extra = users.length - shown.length;
+  let html = '<div class="lc-avatars">';
+  shown.forEach(function(u){
+    html += '<div class="lc-av" style="background:' + u.color + ';">' + getInitials(u.name) + '</div>';
+  });
+  if(extra > 0){
+    html += '<div class="lc-av lc-av-more">+' + extra + '</div>';
+  }
+  html += '</div>';
+  inner.innerHTML = html;
+}
+
+function openAddUserPopup(e){
+  e.stopPropagation();
+  closeLocationPopup();
+  closeRunlistKebab();
+  const popup = document.getElementById('rl-user-popup');
+  const search = document.getElementById('rl-user-search');
+  search.value = '';
+  renderAddUserList('');
+  popup.style.display = 'block';
+  const rect = e.currentTarget.getBoundingClientRect();
+  const popupWidth = 280;
+  let top  = rect.bottom + 6;
+  let left = rect.right - popupWidth;
+  if(left < 8) left = 8;
+  popup.style.top   = top  + 'px';
+  popup.style.left  = left + 'px';
+  popup.style.width = popupWidth + 'px';
+  setTimeout(function(){ search.focus(); }, 30);
+}
+
+function closeAddUserPopup(){
+  document.getElementById('rl-user-popup').style.display = 'none';
+}
+
+function renderAddUserList(filter){
+  const q = (filter || '').trim().toLowerCase();
+  const list = document.getElementById('rl-user-list');
+  if(typeof CCLeads === 'undefined' || !CCLeads.TEAM){
+    list.innerHTML = '<div class="assign-list-empty">Team roster not loaded</div>';
+    return;
+  }
+  const matches = CCLeads.TEAM.filter(function(u){
+    return u.name.toLowerCase().includes(q) || (u.role || '').toLowerCase().includes(q);
+  });
+  if(!matches.length){
+    list.innerHTML = '<div class="assign-list-empty">No people found</div>';
+    return;
+  }
+  list.innerHTML = matches.map(function(u){
+    const added = rlAssignees.indexOf(u.key) >= 0 ? ' added' : '';
+    return '<div class="au-item' + added + '" onmousedown="event.preventDefault()" onclick="event.stopPropagation();toggleAssignee(\'' + u.key + '\')">' +
+             '<div class="au-item-av" style="background:' + u.color + ';">' + getInitials(u.name) + '</div>' +
+             '<div class="au-item-info">' +
+               '<div class="au-item-name">' + u.name + '</div>' +
+               (u.role ? '<div class="au-item-role">' + u.role + '</div>' : '') +
+             '</div>' +
+             '<span class="au-item-check">&#10003;</span>' +
+           '</div>';
+  }).join('');
+}
+
+function toggleAssignee(key){
+  const i = rlAssignees.indexOf(key);
+  if(i >= 0) rlAssignees.splice(i, 1);
+  else       rlAssignees.push(key);
+  const currentQ = document.getElementById('rl-user-search').value;
+  renderAddUserList(currentQ);
+  refreshAddUserButton();
+}
+
+// Initialize button in empty state on load
+refreshAddUserButton();
+
+// Sync location button label if a saved auction was restored from localStorage
+if(rlCurrentLocation){
+  const savedLoc = LOCATIONS.find(function(l){ return l.id === rlCurrentLocation; });
+  if(savedLoc) document.getElementById('rl-loc-label').textContent = savedLoc.name;
+}
+
+// Paint the table body
+rlRender();
+
+/* Kebab menu */
+function toggleRunlistKebab(e){
+  e.stopPropagation();
+  const menu = document.getElementById('rl-kebab-menu');
+  const btn  = e.currentTarget;
+  const isOpen = menu.classList.contains('open');
+  if(isOpen){ menu.classList.remove('open'); btn.classList.remove('open'); }
+  else      { menu.classList.add('open');    btn.classList.add('open'); }
+}
+function closeRunlistKebab(){
+  document.getElementById('rl-kebab-menu').classList.remove('open');
+  document.querySelector('#rl-kebab .kebab-btn').classList.remove('open');
+}
+
+/* Toolbar action fallback — uses the shell's showNavToast */
+function rlAction(label){
+  closeRunlistKebab();
+  window.showNavToast(label + ' is coming soon', 'This action is under construction.');
+}
+
+/* Outside-click + Escape closers */
+document.addEventListener('click', function(e){
+  const locPopup = document.getElementById('rl-loc-popup');
+  const locBtn   = document.getElementById('rl-loc-btn');
+  if(locPopup.style.display === 'block' && !locPopup.contains(e.target) && !locBtn.contains(e.target)){
+    closeLocationPopup();
+  }
+  const userPopup = document.getElementById('rl-user-popup');
+  const userBtn   = document.getElementById('rl-user-btn');
+  if(userPopup.style.display === 'block' && !userPopup.contains(e.target) && !userBtn.contains(e.target)){
+    closeAddUserPopup();
+  }
+  const kebab = document.getElementById('rl-kebab');
+  if(!kebab.contains(e.target)) closeRunlistKebab();
+  const saveAsWrap = document.getElementById('ls-saveas-wrap');
+  const saveAsMenu = document.getElementById('ls-saveas-menu');
+  if(saveAsMenu && saveAsMenu.style.display === 'block' && saveAsWrap && !saveAsWrap.contains(e.target)){
+    closeLsSaveAsMenu();
+  }
+  const fdWrap = document.getElementById('rl-filter-drawer');
+  const fdBtn  = document.getElementById('rl-filter-btn');
+  if(fdWrap && fdWrap.classList.contains('open') && !fdWrap.contains(e.target) && !fdBtn.contains(e.target)){
+    rlCloseFilterDrawer();
+  }
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){ closeLocationPopup(); closeAddUserPopup(); closeRunlistKebab(); rlCloseFilterDrawer(); rlCloseAddModal(); closeLsSaveAsMenu(); closeLayoutSettings(); rlCloseBidHistory(); }
+});
+</script>
+
+</body>
+</html>
