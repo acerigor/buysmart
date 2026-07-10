@@ -185,6 +185,106 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
     </div>
   </div>
 
+  <!-- Vehicle Details modal -->
+  <div class="modal-backdrop modal-fullscreen-mobile" id="rl-vd-modal" onclick="if(event.target===this) rlCloseVehicleDetails()">
+    <div class="modal modal--xwide">
+      <div class="modal-header">
+        <div class="modal-title">Vehicle Details</div>
+        <button class="modal-close" onclick="rlCloseVehicleDetails()">&#x2715;</button>
+      </div>
+      <div class="modal-body vd-body">
+        <div class="vd-left">
+          <div class="vd-top-cards">
+            <div class="editor-card vd-mini"><div class="modal-section-title">Auction Name</div><div id="vd-auction-name"></div></div>
+            <div class="editor-card vd-mini"><div class="modal-section-title">Status</div><div class="vd-status-row"><span id="vd-status-label">Active</span><span class="tog" id="vd-status-tog"></span></div></div>
+            <div class="editor-card vd-mini"><div class="modal-section-title">Store</div><div id="vd-store"></div></div>
+          </div>
+          <div class="vd-image-wrap">
+            <button class="vd-img-nav vd-img-prev" aria-label="Previous image">&#x2039;</button>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13l2-5a2 2 0 0 1 2-1h10a2 2 0 0 1 2 1l2 5"/><path d="M3 13v4a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-1h10v1a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-4"/><circle cx="7" cy="15" r="1"/><circle cx="17" cy="15" r="1"/></svg>
+            <button class="vd-img-nav vd-img-next" aria-label="Next image">&#x203A;</button>
+          </div>
+          <div class="editor-card vd-info-list">
+            <div class="vd-info-row"><span>Run</span><span class="bdg" id="vd-run"></span></div>
+            <div class="vd-info-row"><span>VIN</span><span id="vd-vin"></span></div>
+            <div class="vd-info-row"><span>Mileage</span><span id="vd-mileage"></span></div>
+            <div class="vd-info-row"><span>Final Bid</span><span id="vd-finalbid"></span></div>
+            <div class="vd-info-row"><span>MDS</span><span id="vd-mds"></span></div>
+          </div>
+        </div>
+        <div class="vd-right">
+          <div class="editor-card vd-ann"><div class="modal-section-title">Auction Announcements</div><div class="vd-ann-value" id="vd-ann"></div></div>
+          <div class="vd-tabs">
+            <button class="vd-tab active" data-tab="specs" onclick="rlVdSwitchTab('specs')">Specifications</button>
+            <button class="vd-tab" data-tab="bookvalues" onclick="rlVdSwitchTab('bookvalues')">Book Values</button>
+            <button class="vd-tab" data-tab="damages" onclick="rlVdSwitchTab('damages')">Damages</button>
+            <button class="vd-tab" data-tab="history" onclick="rlVdSwitchTab('history')">History Reports</button>
+            <button class="vd-tab" data-tab="activity" onclick="rlVdSwitchTab('activity')">Activity</button>
+            <button class="vd-tab" data-tab="other" onclick="rlVdSwitchTab('other')">Other Detail</button>
+            <button class="vd-tab" data-tab="parts" onclick="rlVdSwitchTab('parts')">Parts</button>
+          </div>
+          <div class="vd-tab-body">
+            <div class="vd-tab-pane active" data-pane="specs">
+              <div class="vd-specs-grid">
+                <div class="editor-card vd-mini"><div class="modal-section-title">Trim</div><div id="vd-trim"></div></div>
+                <div class="editor-card vd-mini"><div class="modal-section-title">Transmission</div><div id="vd-transmission"></div></div>
+                <div class="editor-card vd-mini"><div class="modal-section-title">Drive Type</div><div id="vd-drivetype"></div></div>
+                <div class="editor-card vd-mini"><div class="modal-section-title">Engine</div><div id="vd-engine"></div></div>
+              </div>
+            </div>
+            <div class="vd-tab-pane vd-tab-stub" data-pane="bookvalues">Book values are coming soon.</div>
+            <div class="vd-tab-pane vd-tab-stub" data-pane="damages">Damage details are coming soon.</div>
+            <div class="vd-tab-pane vd-tab-stub" data-pane="history">History reports are coming soon.</div>
+            <div class="vd-tab-pane vd-tab-stub" data-pane="activity">Activity log is coming soon.</div>
+            <div class="vd-tab-pane vd-tab-stub" data-pane="other">Other details are coming soon.</div>
+            <div class="vd-tab-pane vd-tab-stub" data-pane="parts">Parts list is coming soon.</div>
+          </div>
+          <div class="editor-card vd-comments">
+            <div class="modal-section-title">Comments</div>
+            <div class="vd-comment-input">
+              <button class="ic-btn" title="Voice" onclick="rlAction('Voice comment')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
+              <button class="ic-btn" title="Attach" onclick="rlAction('Attach file')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+              <input type="text" placeholder="Add new comment here or tag Eg. @john"/>
+              <button class="ic-btn vd-send" title="Send" onclick="rlAction('Send comment')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+            </div>
+            <div class="vd-comments-empty">No comments found</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-cancel" onclick="rlVdPrev()">Previous</button>
+        <div style="flex:1"></div>
+        <button class="modal-save" onclick="rlVdNext()">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carfax PDF preview modal -->
+  <div class="modal-backdrop modal-fullscreen-mobile" id="rl-carfax-modal" onclick="if(event.target===this) rlCloseCarfax()">
+    <div class="modal modal--xwide">
+      <div class="modal-header">
+        <div class="modal-title">Carfax Report</div>
+        <button class="modal-close" onclick="rlCloseCarfax()">&#x2715;</button>
+      </div>
+      <div class="modal-body rl-carfax-body">
+        <div class="rl-carfax-toolbar">
+          <button class="tbtn" onclick="rlCarfaxPrevPage()" id="rl-carfax-prev" aria-label="Previous page">&#x2039;</button>
+          <span id="rl-carfax-pageinfo">Page 1 of 1</span>
+          <button class="tbtn" onclick="rlCarfaxNextPage()" id="rl-carfax-next" aria-label="Next page">&#x203A;</button>
+          <div style="flex:1"></div>
+          <button class="tbtn" onclick="rlCarfaxZoomOut()" aria-label="Zoom out">&#x2212;</button>
+          <span id="rl-carfax-zoom">100%</span>
+          <button class="tbtn" onclick="rlCarfaxZoomIn()" aria-label="Zoom in">+</button>
+          <div style="width:8px"></div>
+          <a class="tbtn" id="rl-carfax-download" href="assets/carfax-sample.pdf" download>Download</a>
+        </div>
+        <div class="rl-carfax-canvas-wrap">
+          <canvas id="rl-carfax-canvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Add Runlist modal -->
   <div class="modal-backdrop modal-fullscreen-mobile" id="rl-add-modal" onclick="if(event.target===this) rlCloseAddModal()">
     <div class="modal modal--wide">
@@ -438,7 +538,7 @@ function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 function rlCellVehicle(r){
   const conds = r.conditions.length ? '<div class="veh-conds">' + esc(r.conditions.join(', ')) + '</div>' : '';
   const infoBtn = r.hasInfo ? '<button class="ic-btn" title="Info" onclick="event.stopPropagation();rlAction(\'Info\')">' + INFO_SVG + '</button>' : '';
-  return '<td data-col="vehicle"><div class="name-cell"><div class="veh-thumb">' + CAR_ICON_SVG + '</div><div><div class="nm">' + esc(r.year + ', ' + r.make + ', ' + r.model + ', ' + r.trim + ', ' + r.mileage + ', ' + r.vin) +
+  return '<td data-col="vehicle" onclick="rlOpenVehicleDetails(' + r.srno + ')" style="cursor:pointer;"><div class="name-cell"><div class="veh-thumb">' + CAR_ICON_SVG + '</div><div><div class="nm">' + esc(r.year + ', ' + r.make + ', ' + r.model + ', ' + r.trim + ', ' + r.mileage + ', ' + r.vin) +
     '<span class="name-actions">' +
       '<button class="ic-btn" title="Copy VIN" onclick="event.stopPropagation();rlCopyVin(\'' + r.vin + '\')">' + COPY_SVG + '</button>' +
       '<button class="ic-btn" title="Diagnostics" onclick="event.stopPropagation();rlAction(\'Diagnostics\')">' + WRENCH_SVG + '</button>' +
@@ -466,7 +566,7 @@ const RL_COLS = {
   mmr:       { label:'MMR',                    sortKey:'mmr',       width:90,  cell:function(r){ return '<td data-col="mmr">' + r.mmr + '</td>'; } },
   vrank:     { label:'VRank',                  sortKey:'vrank',     width:90,  cell:function(r){ return rlCellRank(r,'vrank'); } },
   priceRank: { label:'Price Rank',             sortKey:'priceRank', width:110, cell:function(r){ return rlCellRank(r,'priceRank'); } },
-  carfax:    { label:'Carfax',                 sortKey:'carfax',    width:340, cell:function(r){ return '<td data-col="carfax" class="carfax-cell">' + esc(r.carfax) + '</td>'; } },
+  carfax:    { label:'Carfax',                 sortKey:'carfax',    width:340, cell:function(r){ return '<td data-col="carfax" class="carfax-cell" onclick="rlOpenCarfax(' + r.srno + ')" style="cursor:pointer;">' + esc(r.carfax) + '</td>'; } },
   ownerDays: { label:'LastOwnerOwnershipDays', sortKey:'ownerDays', width:220, cell:function(r){ return '<td data-col="ownerDays">' + r.ownerDays + '</td>'; } },
 };
 const RL_DEFAULT_COL_ORDER = Object.keys(RL_COLS);
@@ -543,6 +643,156 @@ function rlUpdateFinalBid(srno, val){
   if(!Array.isArray(r.finalBidHistory)) r.finalBidHistory = [];
   const nextNo = (r.finalBidHistory[0] && r.finalBidHistory[0].no || 0) + 1;
   r.finalBidHistory.unshift({ no: nextNo, oldBid: oldBid, newBid: newBid, dateTime: rlFormatDate(new Date()), changedBy: 'Amin Hussain', changeType: 'Manual' });
+}
+
+/* ── Carfax PDF preview (PDF.js) ───────────────────────────────── */
+const RL_CARFAX_PDF_URL = 'assets/carfax-sample.pdf';
+const RL_PDFJS_VERSION  = '4.6.82';
+let rlCarfaxDoc        = null;
+let rlCarfaxPage       = 1;
+let rlCarfaxScale      = 1.25;
+let rlPdfjsLibPromise  = null;
+let rlCarfaxPending    = false;
+
+function rlLoadPdfjs(){
+  if(!rlPdfjsLibPromise){
+    rlPdfjsLibPromise = import('https://cdn.jsdelivr.net/npm/pdfjs-dist@' + RL_PDFJS_VERSION + '/build/pdf.min.mjs').then(function(mod){
+      mod.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@' + RL_PDFJS_VERSION + '/build/pdf.worker.min.mjs';
+      return mod;
+    });
+  }
+  return rlPdfjsLibPromise;
+}
+
+function rlCarfaxSyncToolbar(){
+  if(!rlCarfaxDoc) return;
+  document.getElementById('rl-carfax-pageinfo').textContent = 'Page ' + rlCarfaxPage + ' of ' + rlCarfaxDoc.numPages;
+  document.getElementById('rl-carfax-zoom').textContent    = Math.round(rlCarfaxScale * 100) + '%';
+  document.getElementById('rl-carfax-prev').disabled = rlCarfaxPage <= 1;
+  document.getElementById('rl-carfax-next').disabled = rlCarfaxPage >= rlCarfaxDoc.numPages;
+}
+
+async function rlOpenCarfax(srno){
+  const row = RUNLIST_DATA.find(function(r){ return r.srno === srno; });
+  if(!row) return;
+  document.getElementById('rl-carfax-modal').classList.add('open');
+  document.getElementById('rl-carfax-pageinfo').textContent = 'Loading…';
+  document.getElementById('rl-carfax-prev').disabled = true;
+  document.getElementById('rl-carfax-next').disabled = true;
+  try {
+    const pdfjsLib = await rlLoadPdfjs();
+    rlCarfaxDoc   = await pdfjsLib.getDocument(RL_CARFAX_PDF_URL).promise;
+    rlCarfaxPage  = 1;
+    rlCarfaxScale = 1.25;
+    rlCarfaxSyncToolbar();
+    await rlCarfaxRenderPage();
+  } catch(e){
+    document.getElementById('rl-carfax-pageinfo').textContent = 'Failed to load PDF';
+    console.error(e);
+  }
+}
+
+async function rlCarfaxRenderPage(){
+  if(rlCarfaxPending) return; // running loop will pick up latest state
+  rlCarfaxPending = true;
+  while(rlCarfaxDoc){
+    const targetPage  = rlCarfaxPage;
+    const targetScale = rlCarfaxScale;
+    const page = await rlCarfaxDoc.getPage(targetPage);
+    if(!rlCarfaxDoc) break;
+    if(targetPage !== rlCarfaxPage || targetScale !== rlCarfaxScale) continue;
+    const viewport = page.getViewport({ scale: targetScale });
+    const canvas = document.getElementById('rl-carfax-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width  = viewport.width;
+    canvas.height = viewport.height;
+    canvas.style.width  = viewport.width  + 'px';
+    canvas.style.height = viewport.height + 'px';
+    try { await page.render({ canvasContext: ctx, viewport: viewport }).promise; }
+    catch(e){ if(e && e.name !== 'RenderingCancelledException') console.error(e); }
+    if(!rlCarfaxDoc) break;
+    if(targetPage === rlCarfaxPage && targetScale === rlCarfaxScale) break;
+  }
+  rlCarfaxPending = false;
+}
+
+function rlCarfaxPrevPage(){ if(rlCarfaxPage > 1){ rlCarfaxPage--; rlCarfaxSyncToolbar(); rlCarfaxRenderPage(); } }
+function rlCarfaxNextPage(){ if(rlCarfaxDoc && rlCarfaxPage < rlCarfaxDoc.numPages){ rlCarfaxPage++; rlCarfaxSyncToolbar(); rlCarfaxRenderPage(); } }
+function rlCarfaxZoomIn(){  rlCarfaxScale = Math.min(3,   +(rlCarfaxScale + 0.25).toFixed(2)); rlCarfaxSyncToolbar(); rlCarfaxRenderPage(); }
+function rlCarfaxZoomOut(){ rlCarfaxScale = Math.max(0.5, +(rlCarfaxScale - 0.25).toFixed(2)); rlCarfaxSyncToolbar(); rlCarfaxRenderPage(); }
+
+function rlCloseCarfax(){
+  document.getElementById('rl-carfax-modal').classList.remove('open');
+  rlCarfaxDoc = null; // running render loop exits on next await via rlCarfaxDoc check
+}
+
+/* ── Vehicle Details modal ─────────────────────────────────────── */
+let rlVdSrno = null;
+
+function rlVdMockDetails(row){
+  const auctions = ['Manheim','ADESA','Copart','Insurance Auto Auctions'];
+  const stores   = ['Houston Direct Auto','LA Motors','Miami Wheels','Dallas Direct'];
+  const trans    = ['Continuously Variable Transmission (CVT)','8-Speed Automatic','6-Speed Manual','10-Speed Automatic'];
+  const drives   = ['FWD','AWD','RWD','4WD'];
+  const engines  = ['2.0L','2.4L I4','3.5L V6','5.7L V8'];
+  return {
+    auctionName: auctions[row.srno % auctions.length],
+    store:       stores[row.srno % stores.length],
+    trim:         row.trim,
+    transmission: trans[row.srno % trans.length],
+    driveType:    drives[row.srno % drives.length],
+    engine:       engines[row.srno % engines.length],
+    announcements:'GREEN LIGHT',
+  };
+}
+
+function rlOpenVehicleDetails(srno){
+  const row = RUNLIST_DATA.find(function(r){ return r.srno === srno; });
+  if(!row) return;
+  rlVdSrno = srno;
+  const m = rlVdMockDetails(row);
+  document.getElementById('vd-auction-name').textContent = m.auctionName;
+  document.getElementById('vd-store').textContent        = m.store;
+  const tog = document.getElementById('vd-status-tog');
+  tog.classList.toggle('off', !row.active);
+  document.getElementById('vd-status-label').textContent = row.active ? 'Active' : 'Inactive';
+  document.getElementById('vd-run').textContent          = '1-' + row.srno;
+  document.getElementById('vd-vin').textContent          = row.vin;
+  document.getElementById('vd-mileage').textContent      = row.mileage.toLocaleString();
+  document.getElementById('vd-finalbid').textContent     = '$' + row.finalBid.toLocaleString() + '.00';
+  document.getElementById('vd-mds').textContent          = row.mds;
+  document.getElementById('vd-ann').textContent          = m.announcements;
+  document.getElementById('vd-trim').textContent         = m.trim;
+  document.getElementById('vd-transmission').textContent = m.transmission;
+  document.getElementById('vd-drivetype').textContent    = m.driveType;
+  document.getElementById('vd-engine').textContent       = m.engine;
+  rlVdSwitchTab('specs');
+  document.getElementById('rl-vd-modal').classList.add('open');
+}
+
+function rlCloseVehicleDetails(){
+  document.getElementById('rl-vd-modal').classList.remove('open');
+  rlVdSrno = null;
+}
+
+function rlVdSwitchTab(key){
+  document.querySelectorAll('#rl-vd-modal .vd-tab').forEach(function(t){
+    t.classList.toggle('active', t.dataset.tab === key);
+  });
+  document.querySelectorAll('#rl-vd-modal .vd-tab-pane').forEach(function(p){
+    p.classList.toggle('active', p.dataset.pane === key);
+  });
+}
+
+function rlVdPrev(){
+  if(rlVdSrno == null) return;
+  const idx = RUNLIST_DATA.findIndex(function(r){ return r.srno === rlVdSrno; });
+  if(idx > 0) rlOpenVehicleDetails(RUNLIST_DATA[idx-1].srno);
+}
+function rlVdNext(){
+  if(rlVdSrno == null) return;
+  const idx = RUNLIST_DATA.findIndex(function(r){ return r.srno === rlVdSrno; });
+  if(idx > -1 && idx < RUNLIST_DATA.length-1) rlOpenVehicleDetails(RUNLIST_DATA[idx+1].srno);
 }
 
 function rlOpenBidHistory(srno){
