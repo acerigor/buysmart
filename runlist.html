@@ -111,16 +111,16 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
       </div>
       <div class="modal-body" style="padding:0;">
         <div class="table-wrap" style="margin:0;border:none;border-radius:0;">
-          <div class="table-scroll">
+          <div class="table-scroll" style="border-radius:0;">
             <table>
               <thead>
                 <tr>
-                  <th style="width:60px;">No</th>
+                  <th style="width:60px;border-radius:0;">No</th>
                   <th style="width:120px;">Old Final Bid</th>
                   <th style="width:120px;">New Final Bid</th>
                   <th style="width:170px;">DateTime</th>
                   <th style="width:170px;">Final Bid Change By</th>
-                  <th style="width:160px;">Change Type</th>
+                  <th style="width:160px;border-radius:0;">Change Type</th>
                 </tr>
               </thead>
               <tbody id="rl-bh-tbody"></tbody>
@@ -269,14 +269,18 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
       <div class="modal-body rl-carfax-body">
         <div class="rl-carfax-toolbar">
           <button class="tbtn" onclick="rlCarfaxPrevPage()" id="rl-carfax-prev" aria-label="Previous page">&#x2039;</button>
-          <span id="rl-carfax-pageinfo">Page 1 of 1</span>
+          <span class="rl-carfax-pagelabel">Page</span>
+          <input type="text" id="rl-carfax-page-input" class="rl-carfax-page-input" inputmode="numeric" value="1"
+                 onkeydown="if(event.key==='Enter')rlCarfaxGoToInputPage()"
+                 onblur="rlCarfaxGoToInputPage()"/>
+          <span class="rl-carfax-pagelabel">of <span id="rl-carfax-page-total">1</span></span>
           <button class="tbtn" onclick="rlCarfaxNextPage()" id="rl-carfax-next" aria-label="Next page">&#x203A;</button>
           <div style="flex:1"></div>
           <button class="tbtn" onclick="rlCarfaxZoomOut()" aria-label="Zoom out">&#x2212;</button>
           <span id="rl-carfax-zoom">100%</span>
           <button class="tbtn" onclick="rlCarfaxZoomIn()" aria-label="Zoom in">+</button>
           <div style="width:8px"></div>
-          <a class="tbtn" id="rl-carfax-download" href="assets/carfax-sample.pdf" download>Download</a>
+          <a class="tbtn" id="rl-carfax-download" href="assets/carfax-sample.pdf" download style="display:none;">Download</a>
         </div>
         <div class="rl-carfax-canvas-wrap">
           <canvas id="rl-carfax-canvas"></canvas>
@@ -666,17 +670,37 @@ function rlLoadPdfjs(){
 
 function rlCarfaxSyncToolbar(){
   if(!rlCarfaxDoc) return;
-  document.getElementById('rl-carfax-pageinfo').textContent = 'Page ' + rlCarfaxPage + ' of ' + rlCarfaxDoc.numPages;
-  document.getElementById('rl-carfax-zoom').textContent    = Math.round(rlCarfaxScale * 100) + '%';
+  const inp = document.getElementById('rl-carfax-page-input');
+  if(document.activeElement !== inp) inp.value = String(rlCarfaxPage);
+  document.getElementById('rl-carfax-page-total').textContent = rlCarfaxDoc.numPages;
+  document.getElementById('rl-carfax-zoom').textContent = Math.round(rlCarfaxScale * 100) + '%';
   document.getElementById('rl-carfax-prev').disabled = rlCarfaxPage <= 1;
   document.getElementById('rl-carfax-next').disabled = rlCarfaxPage >= rlCarfaxDoc.numPages;
+}
+
+function rlCarfaxGoToInputPage(){
+  if(!rlCarfaxDoc) return;
+  const inp = document.getElementById('rl-carfax-page-input');
+  const n = parseInt(String(inp.value).replace(/[^0-9]/g,''), 10);
+  if(isNaN(n) || n < 1 || n > rlCarfaxDoc.numPages){
+    inp.value = String(rlCarfaxPage);
+    return;
+  }
+  if(n === rlCarfaxPage){
+    inp.value = String(rlCarfaxPage);
+    return;
+  }
+  rlCarfaxPage = n;
+  rlCarfaxSyncToolbar();
+  rlCarfaxRenderPage();
 }
 
 async function rlOpenCarfax(srno){
   const row = RUNLIST_DATA.find(function(r){ return r.srno === srno; });
   if(!row) return;
   document.getElementById('rl-carfax-modal').classList.add('open');
-  document.getElementById('rl-carfax-pageinfo').textContent = 'Loading…';
+  document.getElementById('rl-carfax-page-input').value = '…';
+  document.getElementById('rl-carfax-page-total').textContent = '';
   document.getElementById('rl-carfax-prev').disabled = true;
   document.getElementById('rl-carfax-next').disabled = true;
   try {
@@ -687,7 +711,7 @@ async function rlOpenCarfax(srno){
     rlCarfaxSyncToolbar();
     await rlCarfaxRenderPage();
   } catch(e){
-    document.getElementById('rl-carfax-pageinfo').textContent = 'Failed to load PDF';
+    document.getElementById('rl-carfax-page-input').value = '!';
     console.error(e);
   }
 }
