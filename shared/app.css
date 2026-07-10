@@ -926,6 +926,8 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
 .ls-tpl-item:last-child{border-bottom:none;}
 .ls-tpl-item:hover{background:var(--sur2);color:var(--ac2);}
 .ls-tpl-item.selected{color:var(--ac2);background:rgba(79,124,255,.08);}
+.ls-tpl-item .ls-tpl-item-check{visibility:hidden;}
+.ls-tpl-item.selected .ls-tpl-item-check{visibility:visible;}
 .ls-tpl-explainer{font-size:12.5px;color:var(--mu);line-height:1.6;}
 .ls-chip-strip-wrap{position:relative;}
 .ls-chip-strip{display:flex;align-items:center;gap:22px;padding:8px 2px 14px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--brd2) transparent;}
@@ -1126,7 +1128,129 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
 .rl-carfax-toolbar{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--sur2);border-bottom:0.5px solid var(--brd2);font-size:12.5px;color:var(--tx);flex-wrap:wrap;}
 .rl-carfax-toolbar .tbtn{height:32px;padding:0 12px;}
 .rl-carfax-toolbar .tbtn:disabled{opacity:.4;cursor:not-allowed;}
-#rl-carfax-pageinfo,#rl-carfax-zoom{min-width:90px;text-align:center;color:var(--mu);}
+#rl-carfax-zoom{min-width:60px;text-align:center;color:var(--mu);}
+.rl-carfax-pagelabel{color:var(--mu);font-size:12.5px;}
+.rl-carfax-page-input{width:44px;height:28px;text-align:center;background:var(--sur);border:0.5px solid var(--brd2);border-radius:6px;color:var(--tx);font-family:var(--font);font-size:12.5px;outline:none;padding:0 4px;transition:border-color .15s;-moz-appearance:textfield;appearance:textfield;}
+.rl-carfax-page-input:focus{border-color:var(--ac);}
+.rl-carfax-page-input::-webkit-outer-spin-button,
+.rl-carfax-page-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+
+.queue-empty{padding:40px 20px;text-align:center;color:var(--mu);font-size:13px;font-style:italic;background:var(--sur);border-top:0.5px solid var(--brd);}
+
+.us-user-link{color:var(--ac2);text-decoration:none;font-weight:500;transition:color .12s;}
+.us-user-link:hover{color:var(--ac);text-decoration:underline;}
+
+.us-pw-wrap{position:relative;display:block;}
+.us-pw-wrap input{width:100%;padding-right:40px;}
+.us-pw-eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:28px;height:28px;background:transparent;border:none;color:var(--mu);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:color .12s,background .12s;}
+.us-pw-eye:hover{color:var(--tx);background:var(--sur);}
+.us-pw-svg{width:16px;height:16px;}
+.us-pw-svg-off{display:none;}
+.us-pw-eye.showing .us-pw-svg-on{display:none;}
+.us-pw-eye.showing .us-pw-svg-off{display:block;}
+
+/* ── Add User modal ───────────────────────────────────────────── */
+.us-add-modal{max-height:calc(100vh - 40px);}
+.us-add-body{display:flex;flex-direction:row;padding:0;overflow:hidden;flex:1;min-height:0;gap:0;}
+.us-add-nav{width:240px;flex-shrink:0;border-right:0.5px solid var(--brd2);background:var(--sur2);padding:12px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;}
+.us-add-tab{padding:10px 14px;border-radius:8px;color:var(--tx);font-size:13px;font-weight:500;cursor:pointer;transition:background .12s,color .12s;user-select:none;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.us-add-tab:hover{background:var(--sur);}
+.us-add-tab.active{background:rgba(79,124,255,.14);color:var(--ac2);}
+.us-add-tab-parent svg{color:var(--mu);transition:transform .15s;flex-shrink:0;}
+.us-add-tab-parent.open svg{transform:rotate(180deg);}
+.us-add-tab-group .us-add-sub{display:none;flex-direction:column;gap:2px;margin-left:10px;padding-left:8px;border-left:0.5px solid var(--brd2);}
+.us-add-tab-group .us-add-tab-parent.open + .us-add-sub{display:flex;}
+.us-add-subtab{font-size:12.5px;color:var(--mu);padding:8px 12px;}
+.us-add-subtab:hover{color:var(--tx);}
+.us-add-subtab.active{color:var(--ac2);background:transparent;}
+
+.us-add-content{flex:1;min-width:0;padding:20px 24px;overflow-y:auto;}
+.us-add-pane{display:none;}
+.us-add-pane.active{display:block;}
+.us-add-pane.us-add-stub{padding:40px 20px;text-align:center;color:var(--mu);font-style:italic;}
+
+.us-add-section{display:grid;grid-template-columns:220px 1fr;gap:24px;padding:18px 0;border-bottom:0.5px solid var(--brd);}
+.us-add-section:last-child{border-bottom:none;}
+.us-add-section-head{display:flex;flex-direction:column;gap:12px;grid-column:1 / 2;}
+.us-add-section-title{grid-column:1 / 2;font-size:14px;font-weight:600;color:var(--tx);margin:0;}
+.us-add-avatar{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:12px;}
+.us-add-avatar-circle{width:72px;height:72px;border-radius:50%;background:var(--sur2);border:1px dashed var(--brd2);display:flex;align-items:center;justify-content:center;color:var(--mu);}
+.us-add-avatar-circle svg{width:36px;height:36px;}
+.us-add-avatar-label{font-size:12px;color:var(--mu);}
+
+.us-add-toggle-row{grid-column:2 / 3;display:flex;align-items:center;gap:12px;padding:4px 0 8px;font-size:13px;color:var(--tx);}
+.us-add-toggle-row .tog{width:44px;height:22px;border-radius:11px;}
+.us-add-toggle-row .tog::after{width:16px;height:16px;top:3px;left:3px;}
+.us-add-toggle-row .tog:not(.off)::after{transform:translateX(22px);}
+.us-add-field{grid-column:2 / 3;display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+.us-add-field label{font-size:12px;font-weight:500;color:var(--mu);}
+.us-add-field input,.us-add-field select{height:40px;padding:0 12px;background:var(--sur2);border:0.5px solid var(--brd2);border-radius:8px;color:var(--tx);font-family:var(--font);font-size:13px;outline:none;transition:border-color .15s;}
+.us-add-field input:focus,.us-add-field select:focus{border-color:var(--ac);}
+.us-add-field input::placeholder{color:var(--mu);}
+
+@media (max-width:900px){
+  .us-add-body{flex-direction:column;}
+  .us-add-nav{width:100%;border-right:none;border-bottom:0.5px solid var(--brd2);flex-direction:row;overflow-x:auto;padding:8px;}
+  .us-add-section{grid-template-columns:1fr;gap:12px;}
+  .us-add-section-head,.us-add-section-title,.us-add-toggle-row,.us-add-field{grid-column:1 / 2;}
+}
+@media (max-width:640px){
+  .us-add-field input,.us-add-field select{font-size:16px;height:44px;}
+}
+
+/* Permission tab (Runlist/Purchase/etc.) content */
+.us-perm-header{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 18px;border-bottom:0.5px solid var(--brd);margin-bottom:16px;}
+.us-perm-title{margin:0;font-size:16px;font-weight:600;color:var(--tx);}
+.us-perm-toggle-row{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--tx);}
+.us-perm-toggle-row .tog{width:44px;height:22px;border-radius:11px;}
+.us-perm-toggle-row .tog::after{width:16px;height:16px;top:3px;left:3px;}
+.us-perm-toggle-row .tog:not(.off)::after{transform:translateX(22px);}
+.us-perm-table-wrap{background:var(--sur);border:0.5px solid var(--brd2);border-radius:10px;overflow:hidden;}
+.us-perm-table{width:100%;border-collapse:collapse;}
+.us-perm-table thead th{background:var(--sur2);padding:12px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;border-bottom:0.5px solid var(--brd2);}
+.us-perm-table thead th.us-perm-access-col{text-align:center;}
+.us-perm-table tbody tr{border-bottom:0.5px solid var(--brd);}
+.us-perm-table tbody tr:last-child{border-bottom:none;}
+.us-perm-table tbody tr:nth-child(even){background:rgba(255,255,255,.015);}
+.us-perm-desc-cell{padding:12px 16px;font-size:13px;color:var(--tx);}
+.us-perm-opt-cell{padding:12px 16px;text-align:center;width:180px;}
+.us-perm-opt{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--mu);user-select:none;}
+.us-perm-opt input[type="radio"]{position:absolute;opacity:0;width:0;height:0;pointer-events:none;}
+.us-perm-box{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--brd2);background:transparent;display:inline-flex;align-items:center;justify-content:center;transition:all .12s;position:relative;}
+.us-perm-opt:hover .us-perm-box{border-color:var(--ac);}
+.us-perm-opt input[type="radio"]:checked ~ .us-perm-box{background:var(--ac);border-color:var(--ac);}
+.us-perm-opt input[type="radio"]:checked ~ .us-perm-box::after{content:'';width:8px;height:4px;border:solid #fff;border-width:0 0 2px 2px;transform:rotate(-45deg);margin-top:-3px;}
+.us-perm-opt input[type="radio"]:checked ~ *{color:var(--tx);}
+@media (max-width:640px){
+  .us-perm-opt-cell{width:auto;padding:10px 8px;}
+  .us-perm-opt{gap:6px;font-size:12px;}
+}
+
+/* Labeled yes/no toggle pill — YES (blue, knob right) / OFF (gray, knob left) */
+.us-yn-tog{display:inline-flex;align-items:center;justify-content:flex-start;gap:6px;width:64px;height:26px;padding:0 8px;border-radius:13px;background:var(--ac);border:none;cursor:pointer;position:relative;transition:background .18s;font-family:var(--font);font-size:11px;font-weight:600;color:#fff;letter-spacing:.5px;user-select:none;}
+.us-yn-tog::after{content:'';width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);flex-shrink:0;order:2;}
+.us-yn-tog-txt{order:1;}
+.us-yn-tog.off{background:var(--sur2);border:0.5px solid var(--brd2);color:var(--mu);justify-content:flex-end;}
+.us-yn-tog.off .us-yn-tog-txt{order:2;}
+.us-yn-tog.off::after{order:1;}
+
+.back-btn{display:inline-flex;align-items:center;gap:7px;color:var(--mu);text-decoration:none;font-family:var(--font);font-size:13px;font-weight:500;padding:6px 10px;border-radius:8px;background:transparent;border:none;cursor:pointer;transition:all .12s;flex-shrink:0;}
+.back-btn:hover{background:var(--sur2);color:var(--tx);}
+.back-btn svg{width:16px;height:16px;}
+@media (max-width:640px){ .back-btn{min-height:44px;padding:10px 14px;} }
+
+/* ── Settings page card grid ──────────────────────────────────────── */
+.settings-section-title{font-size:14px;font-weight:600;color:var(--tx);margin:0 0 12px;letter-spacing:-.2px;}
+.settings-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;}
+.settings-card{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--sur);border:0.5px solid var(--brd2);border-radius:12px;cursor:pointer;transition:border-color .15s,background .15s;text-align:left;font-family:var(--font);color:var(--tx);width:100%;}
+.settings-card:hover{border-color:var(--ac);background:var(--sur2);}
+.settings-card-icon{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:rgba(79,124,255,.14);display:flex;align-items:center;justify-content:center;color:var(--ac2);}
+.settings-card-icon svg{width:20px;height:20px;}
+.settings-card-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.settings-card-title{font-size:13.5px;font-weight:600;color:var(--tx);}
+.settings-card-sub{font-size:12px;color:var(--mu);}
+@media (max-width:960px){ .settings-grid{grid-template-columns:1fr 1fr;} }
+@media (max-width:640px){ .settings-grid{grid-template-columns:1fr;} .settings-card{padding:16px 18px;} }
 .rl-carfax-canvas-wrap{flex:1;overflow:auto;display:flex;justify-content:center;padding:16px;background:#2a2f3d;}
 #rl-carfax-canvas{background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.35);display:block;}
 
