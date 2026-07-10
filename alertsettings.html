@@ -45,12 +45,16 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
 <div class="modal-backdrop modal-fullscreen-mobile" id="as-modal" onclick="if(event.target===this)asCloseModal()">
   <div class="modal modal--wide">
     <div class="modal-header">
-      <input type="text" class="as-title-input" id="as-title-input" placeholder="Alert name…" maxlength="80"/>
+      <div class="modal-title">Alert Bucket</div>
       <button class="modal-close" onclick="asCloseModal()">&#x2715;</button>
     </div>
     <div class="modal-body">
-      <div>
-        <div class="as-section-label">Actions</div>
+      <div class="editor-card">
+        <div class="modal-section-title">Name</div>
+        <input type="text" class="as-title-input" id="as-title-input" placeholder="Alert name…" maxlength="80"/>
+      </div>
+      <div class="editor-card">
+        <div class="modal-section-title">Actions</div>
         <div class="as-toggle-row">
           <div class="as-toggle-item">
             <span>Alert</span>
@@ -66,8 +70,8 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
           </div>
         </div>
       </div>
-      <div>
-        <div class="as-section-label">Conditions</div>
+      <div class="editor-card">
+        <div class="modal-section-title">Conditions</div>
         <div class="as-rules" id="as-rules"></div>
         <button class="as-add-rule" onclick="asAddRule()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -112,6 +116,27 @@ const AS_FIELDS = [
 const AS_OPS = ['<','<=','>','>=','=','==','Is null','Is not null'];
 const AS_STORAGE_KEY = 'buysmart:as:alerts';
 
+const AS_SEED_ALERTS = [
+  { id:1, name:'High-mileage flag',
+    alertOn:true, proxyOn:false, inactiveOn:false,
+    rules:[{ field:'mileage', op:'>=', value:'100000' }] },
+  { id:2, name:'Over MMR bid',
+    alertOn:true, proxyOn:true, inactiveOn:false,
+    rules:[
+      { field:'finalBid', op:'>',  value:'0' },
+      { field:'mmr',      op:'<=', value:'20000' },
+    ] },
+  { id:3, name:'Missing Carfax',
+    alertOn:false, proxyOn:false, inactiveOn:true,
+    rules:[{ field:'carfax', op:'Is null', value:'' }] },
+  { id:4, name:'Premium brand watch',
+    alertOn:true, proxyOn:false, inactiveOn:false,
+    rules:[
+      { field:'make',  op:'==', value:'LEXUS' },
+      { field:'vrank', op:'<=', value:'20000' },
+    ] },
+];
+
 let AS_ALERTS = [];
 let AS_COUNTER = 0;
 let asEditingId = null;
@@ -122,13 +147,18 @@ function asEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').r
 function asLoad(){
   try{
     const raw = localStorage.getItem(AS_STORAGE_KEY);
-    if(!raw) return;
-    const data = JSON.parse(raw);
-    if(data && Array.isArray(data.alerts)){
-      AS_ALERTS = data.alerts;
-      AS_COUNTER = data.counter || AS_ALERTS.reduce(function(m,a){ return Math.max(m, a.id); }, 0);
+    if(raw){
+      const data = JSON.parse(raw);
+      if(data && Array.isArray(data.alerts)){
+        AS_ALERTS  = data.alerts;
+        AS_COUNTER = data.counter || AS_ALERTS.reduce(function(m,a){ return Math.max(m, a.id); }, 0);
+        return;
+      }
     }
   }catch(e){}
+  AS_ALERTS  = AS_SEED_ALERTS.map(function(a){ return JSON.parse(JSON.stringify(a)); });
+  AS_COUNTER = AS_ALERTS.reduce(function(m,a){ return Math.max(m, a.id); }, 0);
+  asSaveStorage();
 }
 function asSaveStorage(){
   try{ localStorage.setItem(AS_STORAGE_KEY, JSON.stringify({alerts:AS_ALERTS, counter:AS_COUNTER})); }catch(e){}
