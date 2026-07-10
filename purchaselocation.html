@@ -76,6 +76,15 @@ BuySmartShell.init({ page: 'purchase location', title: 'Purchase Location' });
 
 /* ── Purchase Location list + Add/Edit modal ─────────────────────── */
 const PL_STORAGE_KEY = 'buysmart:pl:locations';
+
+const PL_SEED_LOCATIONS = [
+  { id: 1, name: 'Manheim – Dallas',                 zipcode: '75042', lotId: 'MDAL-01' },
+  { id: 2, name: 'ADESA – Boston',                   zipcode: '01864', lotId: 'ADBO-14' },
+  { id: 3, name: 'Copart – Los Angeles',             zipcode: '90210', lotId: 'CLAX-07' },
+  { id: 4, name: 'USA Direct Auto – Houston',        zipcode: '77076', lotId: 'UDA-HOU-03' },
+  { id: 5, name: 'Insurance Auto Auctions – Miami',  zipcode: '33172', lotId: 'IAA-MIA-22' },
+];
+
 let PL_LOCATIONS = [];
 let PL_COUNTER = 0;
 let plEditingId = null;
@@ -86,13 +95,18 @@ function plEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').r
 function plLoad(){
   try{
     const raw = localStorage.getItem(PL_STORAGE_KEY);
-    if(!raw) return;
-    const data = JSON.parse(raw);
-    if(data && Array.isArray(data.locations)){
-      PL_LOCATIONS = data.locations;
-      PL_COUNTER = data.counter || PL_LOCATIONS.reduce(function(m,l){ return Math.max(m, l.id); }, 0);
+    if(raw){
+      const data = JSON.parse(raw);
+      if(data && Array.isArray(data.locations)){
+        PL_LOCATIONS = data.locations;
+        PL_COUNTER   = data.counter || PL_LOCATIONS.reduce(function(m,l){ return Math.max(m, l.id); }, 0);
+        return;
+      }
     }
   }catch(e){}
+  PL_LOCATIONS = PL_SEED_LOCATIONS.map(function(l){ return JSON.parse(JSON.stringify(l)); });
+  PL_COUNTER   = PL_LOCATIONS.reduce(function(m,l){ return Math.max(m, l.id); }, 0);
+  plSaveStorage();
 }
 function plSaveStorage(){
   try{ localStorage.setItem(PL_STORAGE_KEY, JSON.stringify({locations:PL_LOCATIONS, counter:PL_COUNTER})); }catch(e){}
