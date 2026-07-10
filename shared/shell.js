@@ -156,21 +156,94 @@
     '    <span id="nav-toast-body">This section is under construction.</span>',
     '  </div>',
     '  <button class="nav-toast-close" onclick="hideNavToast()" title="Dismiss">&#x2715;</button>',
+    '</div>',
+
+    '<div class="modal-backdrop modal-fullscreen-mobile" id="queue-modal" onclick="if(event.target===this)closeQueueModal()">',
+    '  <div class="modal modal--xwide">',
+    '    <div class="modal-header">',
+    '      <div class="modal-title" id="queue-modal-title">Sheet Queue</div>',
+    '      <button class="modal-close" onclick="closeQueueModal()">&#x2715;</button>',
+    '    </div>',
+    '    <div class="modal-body" style="padding:0;">',
+    '      <div class="table-wrap" style="margin:0;border:none;border-radius:0;">',
+    '        <div class="table-scroll" style="border-radius:0;">',
+    '          <table>',
+    '            <thead>',
+    '              <tr id="queue-thead-row"></tr>',
+    '            </thead>',
+    '            <tbody id="queue-tbody"></tbody>',
+    '          </table>',
+    '        </div>',
+    '        <div class="queue-empty" id="queue-empty">No data available</div>',
+    '      </div>',
+    '    </div>',
+    '  </div>',
     '</div>'
   ].join('\n');
 
   // ─── Handlers (exposed as globals so inline onclick attrs resolve) ──────────
   var navToastTimer = null;
 
+  var QUEUE_LABELS = ['Sheet Queue', 'Data Queue', 'Bid Queue'];
+
+  var QUEUE_COLS = {
+    'Sheet Queue': [
+      { label:'No',         width:60  },
+      { label:'Sheet Name', width:240 },
+      { label:'Date',       width:150 },
+      { label:'Status',     width:150 },
+      { label:'Priority',   width:150 },
+      { label:'Remove',     width:120 }
+    ],
+    'Data Queue': [
+      { label:'No',         width:60  },
+      { label:'Store Name', width:280 },
+      { label:'Status',     width:180 },
+      { label:'Priority',   width:180 },
+      { label:'Remove',     width:140 }
+    ],
+    'Bid Queue': [
+      { label:'No',         width:60  },
+      { label:'Sheet Name', width:240 },
+      { label:'Type',       width:150 },
+      { label:'Status',     width:150 },
+      { label:'Priority',   width:150 },
+      { label:'Remove',     width:120 }
+    ]
+  };
+
   window.navClick = function(label){
     document.querySelectorAll('.sb-item, .md-item').forEach(function(el){
       el.classList.toggle('active', el.getAttribute('data-nav') === label.toLowerCase() || (el.querySelector('span') && el.querySelector('span').textContent === label));
     });
+    if(QUEUE_LABELS.indexOf(label) !== -1){
+      window.openQueueModal(label);
+      return;
+    }
     if(NAV_ROUTES[label]){
       window.location.href = NAV_ROUTES[label];
       return;
     }
     window.showNavToast(label + ' is coming soon', 'This section is under construction.');
+  };
+
+  window.openQueueModal = function(label){
+    var m = document.getElementById('queue-modal');
+    if(!m) return;
+    document.getElementById('queue-modal-title').textContent = label;
+    var cols = QUEUE_COLS[label] || [];
+    var last = cols.length - 1;
+    document.getElementById('queue-thead-row').innerHTML = cols.map(function(c, i){
+      var edgeRadius = (i === 0 || i === last) ? 'border-radius:0;' : '';
+      return '<th style="width:' + c.width + 'px;' + edgeRadius + '">' + c.label + '</th>';
+    }).join('');
+    document.getElementById('queue-tbody').innerHTML = '';
+    document.getElementById('queue-empty').style.display = 'block';
+    m.classList.add('open');
+  };
+  window.closeQueueModal = function(){
+    var m = document.getElementById('queue-modal');
+    if(m) m.classList.remove('open');
   };
 
   window.toggleMobileDrawer = function(){
