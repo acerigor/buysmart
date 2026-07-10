@@ -16,6 +16,10 @@ const TYPES = {
   '.jpeg': 'image/jpeg',
   '.gif': 'image/gif',
   '.ico': 'image/x-icon',
+  '.pdf': 'application/pdf',
+  '.webp': 'image/webp',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
 };
 
 http.createServer((req, res) => {
