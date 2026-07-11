@@ -7,30 +7,478 @@
 <link rel="stylesheet" href="shared/app.css">
 <link rel="stylesheet" href="shared/settings.css">
 <link rel="stylesheet" href="shared/contact-panel.css">
+<link rel="stylesheet" href="shared/date-picker.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif;}
 .root.main-area{height:calc(100vh - 64px);min-height:0;overflow:hidden;display:flex;flex-direction:column;}
 @media (max-width:640px){ .root.main-area{height:auto;min-height:0;overflow:visible;} }
+.dash-period-seg{padding:3px;}
+.dash-period-btn{font-size:12.5px;padding:6px 14px;border-radius:6px;}
+.dash-cal-btn{display:inline-flex;align-items:center;gap:8px;background:var(--sur2);border:1px solid var(--brd2);color:var(--tx);font-family:var(--font);font-size:12.5px;padding:6px 12px;border-radius:8px;cursor:pointer;transition:border-color .12s,background .12s;}
+.dash-cal-btn:hover{border-color:var(--ac);}
+.dash-cal-btn svg{color:var(--mu);flex-shrink:0;}
+.dash-body{padding:0;display:flex;flex-direction:column;gap:24px;}
+.dash-group{display:flex;flex-direction:column;gap:16px;}
+.dash-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+@media (max-width:1024px){.dash-kpi-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:640px){.dash-kpi-grid{grid-template-columns:1fr;}}
+.widget{background:var(--sur);border:0.5px solid var(--brd2);border-radius:12px;padding:0;overflow:hidden;position:relative;transition:border-color .15s;display:flex;flex-direction:column;min-height:180px;}
+.widget:hover{border-color:rgba(255,255,255,.18);}
+.w-head{display:flex;align-items:center;gap:6px;padding:6px 16px;border-bottom:0.5px solid var(--brd);min-height:52px;}
+.w-title{flex:1;font-size:11px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:.7px;}
+.w-body{flex:1;padding:16px;}
+.w-drag{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--mu);cursor:grab;border-radius:6px;flex-shrink:0;opacity:.45;transition:opacity .12s,color .12s,background .12s;background:transparent;border:none;}
+.widget:hover .w-drag{opacity:1;}
+.w-drag:hover{color:var(--ac2);background:rgba(255,255,255,.05);opacity:1;}
+.w-drag:active{cursor:grabbing;}
+.w-drag svg{width:14px;height:14px;}
+.widget.dragging{opacity:.35;transform:scale(.98);cursor:grabbing;}
+.widget.drop-target{border-color:var(--ac);background:rgba(79,124,255,.04);box-shadow:0 0 0 2px rgba(79,124,255,.18) inset;}
+.kpi{display:flex;flex-direction:column;gap:10px;}
+.kpi-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.kpi-icon svg{width:18px;height:18px;}
+.kpi-returned .kpi-icon{background:rgba(79,124,255,.14);color:var(--ac2);}
+.kpi-inbound  .kpi-icon{background:rgba(45,212,191,.14);color:var(--teal);}
+.kpi-answered .kpi-icon{background:rgba(34,200,138,.14);color:var(--gr);}
+.kpi-email-in .kpi-icon{background:rgba(245,166,35,.15);color:var(--am);}
+.kpi-num{font-size:32px;font-weight:600;line-height:.95;letter-spacing:-1.2px;font-family:var(--font);}
+.kpi-returned .kpi-num{color:var(--ac2);}
+.kpi-inbound  .kpi-num{color:var(--teal);}
+.kpi-answered .kpi-num{color:var(--gr);}
+.kpi-email-in .kpi-num{color:var(--am);}
+.kpi-sub{font-size:11.5px;color:var(--mu);margin-top:-3px;}
+.dash-graphs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+@media (max-width:1024px){.dash-graphs-grid{grid-template-columns:1fr;}}
+.widget--graph{min-height:280px;}
+.widget--graph .w-body{position:relative;padding:12px 16px 16px;}
+.dash-chart{width:100%;height:220px;display:block;}
+.dash-chart-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mu);font-family:var(--font);pointer-events:none;}
 </style>
 </head>
 <body>
 
 <div class="root main-area" id="root">
   <div class="set-page-head">
-    <span class="set-page-title"></span>
+    <div class="lblp-sort-seg dash-period-seg">
+      <button class="lblp-sort-btn dash-period-btn on" data-period="today" onclick="dashSetPeriod('today', this)">Today</button>
+      <button class="lblp-sort-btn dash-period-btn"    data-period="week"  onclick="dashSetPeriod('week',  this)">Week</button>
+      <button class="lblp-sort-btn dash-period-btn"    data-period="month" onclick="dashSetPeriod('month', this)">Month</button>
+      <button class="lblp-sort-btn dash-period-btn"    data-period="all"   onclick="dashSetPeriod('all',   this)">All</button>
+    </div>
+    <button class="dash-cal-btn" id="dash-cal-btn" onclick="dashOpenCalendar(event)" aria-label="Pick a date">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      <span id="dash-cal-label">Today</span>
+    </button>
   </div>
   <div class="set-scroll">
-    <section class="set-section">
-      <!-- Dashboard content -->
+    <section class="set-section dash-body">
+      <div class="dash-group">
+        <div class="dash-kpi-grid" id="dash-kpi-grid"></div>
+      </div>
+      <div class="dash-group">
+        <div class="dash-graphs-grid" id="dash-graphs-grid"></div>
+      </div>
     </section>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="shared/notifications.js"></script>
 <script src="shared/contact-panel.js"></script>
+<script src="shared/date-picker.js"></script>
 <script src="shared/shell.js"></script>
 <script>BuySmartShell.init({ page: 'home', title: 'Dashboard' });</script>
+<script>
+const DASH_STATE = { period: 'today', refDate: null };
+
+function dashSetPeriod(period, el){
+  DASH_STATE.period = period;
+  document.querySelectorAll('.dash-period-btn').forEach(function(b){ b.classList.toggle('on', b === el); });
+  dashApply();
+}
+
+function dashOpenCalendar(e){
+  e.stopPropagation();
+  const anchor = document.getElementById('dash-cal-btn');
+  window.CCDatePicker.open({
+    anchor: anchor,
+    value: DASH_STATE.refDate || undefined,
+    onChange: function(v){
+      DASH_STATE.refDate = v;
+      document.getElementById('dash-cal-label').textContent = v;
+      dashApply();
+    }
+  });
+}
+
+const DASH_KPIS = [
+  { key:'total',    title:'Total Assets',      value:367, sub:'Total assets in the inventory',      icon:'box',    variant:'returned' },
+  { key:'auction',  title:'Assets in Auction', value:7,   sub:'Assets currently up for auction.',   icon:'chart',  variant:'inbound' },
+  { key:'sold',     title:'Assets Sold',       value:0,   sub:'Assets sold successfully.',          icon:'dollar', variant:'answered' },
+  { key:'upcoming', title:'Upcoming Auctions', value:2,   sub:'Auctions scheduled for the future.', icon:'clock',  variant:'email-in' },
+];
+function dashKpiIcon(name){
+  switch(name){
+    case 'box':    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>';
+    case 'chart':  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>';
+    case 'dollar': return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 8H10.5a2.5 2.5 0 0 0 0 5h3a2.5 2.5 0 0 1 0 5H8"/><line x1="12" y1="6" x2="12" y2="18"/></svg>';
+    case 'clock':  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/><polyline points="12 7 12 12 15 14"/></svg>';
+  }
+  return '';
+}
+function dashRenderKpis(){
+  const el = document.getElementById('dash-kpi-grid'); if(!el) return;
+  el.innerHTML = DASH_KPIS.map(function(k){
+    return '<div class="widget" data-key="' + k.key + '">' +
+      '<div class="w-head">' +
+        '<div class="w-drag" onmousedown="dashDragArm(\'' + k.key + '\')" onmouseup="dashDragDisarm(\'' + k.key + '\')" title="Drag to rearrange">' +
+          '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+            '<circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>' +
+            '<circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>' +
+            '<circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>' +
+          '</svg>' +
+        '</div>' +
+        '<div class="w-title">' + k.title + '</div>' +
+      '</div>' +
+      '<div class="w-body">' +
+        '<div class="kpi kpi-' + k.variant + '">' +
+          '<div class="kpi-icon">' + dashKpiIcon(k.icon) + '</div>' +
+          '<div><div class="kpi-num">' + k.value + '</div></div>' +
+          '<div class="kpi-sub">' + k.sub + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  dashWireDrag();
+}
+
+let dashDragKey = null;
+function dashDragArm(key){
+  const w = document.querySelector('.widget[data-key="' + key + '"]');
+  if(w) w.draggable = true;
+}
+function dashDragDisarm(key){
+  const w = document.querySelector('.widget[data-key="' + key + '"]');
+  if(w) w.draggable = false;
+}
+function dashWireDrag(){
+  document.querySelectorAll('#dash-kpi-grid .widget').forEach(function(card){
+    card.addEventListener('dragstart', function(e){
+      dashDragKey = this.dataset.key;
+      if(e.dataTransfer){
+        e.dataTransfer.effectAllowed = 'move';
+        try{ e.dataTransfer.setData('text/plain', dashDragKey); }catch(_){}
+      }
+      setTimeout(function(){ card.classList.add('dragging'); }, 0);
+    });
+    card.addEventListener('dragend', function(){
+      this.classList.remove('dragging');
+      this.draggable = false;
+      document.querySelectorAll('#dash-kpi-grid .widget.drop-target').forEach(function(c){ c.classList.remove('drop-target'); });
+      dashDragKey = null;
+    });
+    card.addEventListener('dragover', function(e){
+      if(!dashDragKey || this.dataset.key === dashDragKey) return;
+      e.preventDefault();
+      if(e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    });
+    card.addEventListener('dragenter', function(){
+      if(!dashDragKey || this.dataset.key === dashDragKey) return;
+      this.classList.add('drop-target');
+    });
+    card.addEventListener('dragleave', function(e){
+      if(!this.contains(e.relatedTarget)) this.classList.remove('drop-target');
+    });
+    card.addEventListener('drop', function(e){
+      e.preventDefault();
+      this.classList.remove('drop-target');
+      const targetKey = this.dataset.key;
+      if(!dashDragKey || targetKey === dashDragKey) return;
+      dashReorderKpi(dashDragKey, targetKey);
+    });
+  });
+}
+function dashReorderKpi(srcKey, tgtKey){
+  const si = DASH_KPIS.findIndex(function(k){ return k.key === srcKey; });
+  const ti = DASH_KPIS.findIndex(function(k){ return k.key === tgtKey; });
+  if(si < 0 || ti < 0) return;
+  const moved = DASH_KPIS.splice(si, 1)[0];
+  DASH_KPIS.splice(ti, 0, moved);
+  dashRenderKpis();
+  dashSaveKpiOrder();
+}
+const DASH_GRAPHS = [
+  { key:'activeInventory',       title:'Active Inventory',           kind:'line' },
+  { key:'assetValueChart',       title:'Asset Value Chart',          kind:'line' },
+  { key:'assetSalesCycle',       title:'Asset Sales Cycle',          kind:'donut' },
+  { key:'salesChart',            title:'Sales Chart',                kind:'line' },
+  { key:'purchaseRatio',         title:'Purchase Ratio',             kind:'stackedBar' },
+  { key:'purchaseChart',         title:'Purchase Chart',             kind:'line' },
+  { key:'highestSellingChart',   title:'Highest Selling Chart',      kind:'bar' },
+  { key:'salePerfByLocation',    title:'Sale Performance By Location', kind:'bar' },
+  { key:'profitChart',           title:'Profit Chart',               kind:'line' },
+  { key:'purchaseSalesAssetChart', title:'Purchase/Sales Asset Chart', kind:'line' },
+];
+
+const DASH_PALETTE = { blue:'#6e9dff', teal:'#2dd4bf', green:'#22c88a', amber:'#f5a623', red:'#e85555', purple:'#c4b5fd' };
+const dashChartInstances = {};
+
+if(window.Chart){
+  Chart.defaults.font.family = "'DM Sans', sans-serif";
+  Chart.defaults.font.size = 11;
+  Chart.defaults.color = '#a5aac0';
+  Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+  Chart.defaults.plugins.legend.labels.usePointStyle = true;
+  Chart.defaults.plugins.legend.labels.boxWidth = 8;
+  Chart.defaults.plugins.legend.labels.boxHeight = 8;
+  Chart.defaults.plugins.legend.labels.padding = 12;
+  Chart.defaults.plugins.tooltip.backgroundColor = '#1e2333';
+  Chart.defaults.plugins.tooltip.borderColor = '#4f7cff';
+  Chart.defaults.plugins.tooltip.borderWidth = 1;
+  Chart.defaults.plugins.tooltip.titleColor = '#e8eaf0';
+  Chart.defaults.plugins.tooltip.bodyColor = '#e8eaf0';
+  Chart.defaults.plugins.tooltip.padding = 10;
+  Chart.defaults.plugins.tooltip.cornerRadius = 8;
+  Chart.defaults.plugins.tooltip.displayColors = true;
+}
+
+function dashChartDestroy(key){
+  if(dashChartInstances[key]){ dashChartInstances[key].destroy(); delete dashChartInstances[key]; }
+}
+function dashChartHideEmpty(canvas){
+  const empty = canvas.parentElement && canvas.parentElement.querySelector('.dash-chart-empty');
+  if(empty) empty.style.display = 'none';
+}
+function dashChartCommonScales(){
+  return {
+    x: { grid:{display:false}, ticks:{color:'#7a7f94'} },
+    y: { grid:{color:'rgba(255,255,255,0.05)', drawBorder:false}, ticks:{color:'#7a7f94'}, beginAtZero:true }
+  };
+}
+
+function dashChartLine(key, data){
+  const canvas = document.getElementById('dash-chart-' + key); if(!canvas || !window.Chart) return;
+  dashChartDestroy(key);
+  dashChartInstances[key] = new Chart(canvas, {
+    type:'line',
+    data:{ labels:data.labels, datasets:data.datasets.map(function(d){
+      return { label:d.label, data:d.data, borderColor:d.color, backgroundColor:d.color+'33',
+               borderWidth:2, tension:0.35, pointRadius:0, pointHoverRadius:4, fill:true };
+    })},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:data.datasets.length>1, position:'bottom' } },
+      scales: dashChartCommonScales(),
+      interaction:{ mode:'index', intersect:false }
+    }
+  });
+  dashChartHideEmpty(canvas);
+}
+
+function dashChartBar(key, data, opts){
+  opts = opts || {};
+  const canvas = document.getElementById('dash-chart-' + key); if(!canvas || !window.Chart) return;
+  dashChartDestroy(key);
+  dashChartInstances[key] = new Chart(canvas, {
+    type:'bar',
+    data:{ labels:data.labels, datasets:data.datasets.map(function(d){
+      return { label:d.label, data:d.data, backgroundColor:d.color, borderRadius:4, borderSkipped:false };
+    })},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:data.datasets.length>1, position:'bottom' } },
+      scales:{
+        x:{ stacked:!!opts.stacked, grid:{display:false}, ticks:{color:'#7a7f94'} },
+        y:{ stacked:!!opts.stacked, grid:{color:'rgba(255,255,255,0.05)', drawBorder:false}, ticks:{color:'#7a7f94'}, beginAtZero:true }
+      },
+      interaction:{ mode:'index', intersect:false }
+    }
+  });
+  dashChartHideEmpty(canvas);
+}
+
+function dashChartDonut(key, data){
+  const canvas = document.getElementById('dash-chart-' + key); if(!canvas || !window.Chart) return;
+  dashChartDestroy(key);
+  dashChartInstances[key] = new Chart(canvas, {
+    type:'doughnut',
+    data:{ labels:data.labels, datasets:[{ data:data.values, backgroundColor:data.colors, borderColor:'#181c27', borderWidth:2 }]},
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'65%',
+      plugins:{ legend:{ position:'bottom' } }
+    }
+  });
+  dashChartHideEmpty(canvas);
+}
+
+function dashRenderGraphs(){
+  const el = document.getElementById('dash-graphs-grid'); if(!el) return;
+  Object.keys(dashChartInstances).forEach(dashChartDestroy);
+  el.innerHTML = DASH_GRAPHS.map(function(g){
+    return '<div class="widget widget--graph" data-key="' + g.key + '">' +
+      '<div class="w-head">' +
+        '<div class="w-drag" onmousedown="dashDragArm(\'' + g.key + '\')" onmouseup="dashDragDisarm(\'' + g.key + '\')" title="Drag to rearrange">' +
+          '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+            '<circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>' +
+            '<circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>' +
+            '<circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>' +
+          '</svg>' +
+        '</div>' +
+        '<div class="w-title">' + g.title + '</div>' +
+      '</div>' +
+      '<div class="w-body">' +
+        '<canvas class="dash-chart" id="dash-chart-' + g.key + '"></canvas>' +
+        '<div class="dash-chart-empty">Chart coming soon…</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  dashWireGraphDrag();
+}
+
+function dashWireGraphDrag(){
+  document.querySelectorAll('#dash-graphs-grid .widget').forEach(function(card){
+    card.addEventListener('dragstart', function(e){
+      dashDragKey = this.dataset.key;
+      if(e.dataTransfer){
+        e.dataTransfer.effectAllowed = 'move';
+        try{ e.dataTransfer.setData('text/plain', dashDragKey); }catch(_){}
+      }
+      setTimeout(function(){ card.classList.add('dragging'); }, 0);
+    });
+    card.addEventListener('dragend', function(){
+      this.classList.remove('dragging');
+      this.draggable = false;
+      document.querySelectorAll('#dash-graphs-grid .widget.drop-target').forEach(function(c){ c.classList.remove('drop-target'); });
+      dashDragKey = null;
+    });
+    card.addEventListener('dragover', function(e){
+      if(!dashDragKey || this.dataset.key === dashDragKey) return;
+      e.preventDefault();
+      if(e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    });
+    card.addEventListener('dragenter', function(){
+      if(!dashDragKey || this.dataset.key === dashDragKey) return;
+      this.classList.add('drop-target');
+    });
+    card.addEventListener('dragleave', function(e){
+      if(!this.contains(e.relatedTarget)) this.classList.remove('drop-target');
+    });
+    card.addEventListener('drop', function(e){
+      e.preventDefault();
+      this.classList.remove('drop-target');
+      const targetKey = this.dataset.key;
+      if(!dashDragKey || targetKey === dashDragKey) return;
+      dashReorderGraph(dashDragKey, targetKey);
+    });
+  });
+}
+function dashReorderGraph(srcKey, tgtKey){
+  const si = DASH_GRAPHS.findIndex(function(g){ return g.key === srcKey; });
+  const ti = DASH_GRAPHS.findIndex(function(g){ return g.key === tgtKey; });
+  if(si < 0 || ti < 0) return;
+  const moved = DASH_GRAPHS.splice(si, 1)[0];
+  DASH_GRAPHS.splice(ti, 0, moved);
+  dashRenderGraphs();
+  if(window.Chart) dashDrawGraphs();
+  dashSaveGraphOrder();
+}
+
+function dashPeriodInfo(p){
+  switch(p){
+    case 'today': return { labels:['12a','4a','8a','12p','4p','8p'], seed:11 };
+    case 'week':  return { labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], seed:17 };
+    case 'month': return { labels:['W1','W2','W3','W4'], seed:23 };
+    default:      return { labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], seed:29 };
+  }
+}
+function dashSeries(n, min, max, seed){
+  const out = [];
+  for(let i=0; i<n; i++){
+    const v = (Math.sin(i*1.7 + seed) + 1) / 2;
+    out.push(Math.round(min + v * (max - min)));
+  }
+  return out;
+}
+
+function dashDrawGraphs(){
+  const p = dashPeriodInfo(DASH_STATE.period);
+  const L = p.labels, n = L.length, s = p.seed;
+
+  dashChartLine('activeInventory', {
+    labels:L, datasets:[{ label:'Active', data: dashSeries(n, 280, 380, s+1), color: DASH_PALETTE.blue }]
+  });
+  dashChartLine('assetValueChart', {
+    labels:L, datasets:[{ label:'Value ($k)', data: dashSeries(n, 900, 1650, s+2), color: DASH_PALETTE.teal }]
+  });
+  dashChartDonut('assetSalesCycle', {
+    labels:['New','Active','Sold','Archived'],
+    values: dashSeries(4, 15, 90, s+3),
+    colors:[DASH_PALETTE.blue, DASH_PALETTE.teal, DASH_PALETTE.green, DASH_PALETTE.amber]
+  });
+  dashChartLine('salesChart', {
+    labels:L, datasets:[{ label:'Sales', data: dashSeries(n, 5, 45, s+4), color: DASH_PALETTE.green }]
+  });
+  dashChartBar('purchaseRatio', {
+    labels:L, datasets:[
+      { label:'Purchased', data: dashSeries(n, 8, 30, s+5),  color: DASH_PALETTE.blue },
+      { label:'Available', data: dashSeries(n, 20, 80, s+6), color: DASH_PALETTE.amber }
+    ]
+  }, { stacked:true });
+  dashChartLine('purchaseChart', {
+    labels:L, datasets:[{ label:'Purchases', data: dashSeries(n, 4, 35, s+7), color: DASH_PALETTE.blue }]
+  });
+  dashChartBar('highestSellingChart', {
+    labels:['Sedan','SUV','Truck','Coupe','Hatch'],
+    datasets:[{ label:'Sales', data: dashSeries(5, 12, 68, s+8), color: DASH_PALETTE.teal }]
+  });
+  dashChartBar('salePerfByLocation', {
+    labels:['Houston','Dallas','Austin','Atlanta','Boston','Chicago'],
+    datasets:[{ label:'Sales', data: dashSeries(6, 8, 55, s+9), color: DASH_PALETTE.purple }]
+  });
+  dashChartLine('profitChart', {
+    labels:L, datasets:[{ label:'Profit ($k)', data: dashSeries(n, 20, 180, s+10), color: DASH_PALETTE.green }]
+  });
+  dashChartLine('purchaseSalesAssetChart', {
+    labels:L, datasets:[
+      { label:'Purchase', data: dashSeries(n, 10, 65, s+11), color: DASH_PALETTE.blue },
+      { label:'Sales',    data: dashSeries(n, 8, 55, s+12),  color: DASH_PALETTE.teal }
+    ]
+  });
+}
+
+const DASH_STORE_KPI   = 'buysmart:dash:kpiOrder';
+const DASH_STORE_GRAPH = 'buysmart:dash:graphOrder';
+
+function dashApplySavedOrder(arr, savedKeys){
+  const byKey = {}; arr.forEach(function(x){ byKey[x.key] = x; });
+  const seen = {}; const ordered = [];
+  savedKeys.forEach(function(k){ if(byKey[k] && !seen[k]){ ordered.push(byKey[k]); seen[k] = true; } });
+  arr.forEach(function(x){ if(!seen[x.key]){ ordered.push(x); seen[x.key] = true; } });
+  arr.length = 0;
+  for(let i=0; i<ordered.length; i++) arr.push(ordered[i]);
+}
+function dashLoadOrder(){
+  try {
+    const kpiRaw = localStorage.getItem(DASH_STORE_KPI);
+    if(kpiRaw){ const k = JSON.parse(kpiRaw); if(Array.isArray(k)) dashApplySavedOrder(DASH_KPIS, k); }
+  } catch(_){}
+  try {
+    const gRaw = localStorage.getItem(DASH_STORE_GRAPH);
+    if(gRaw){ const g = JSON.parse(gRaw); if(Array.isArray(g)) dashApplySavedOrder(DASH_GRAPHS, g); }
+  } catch(_){}
+}
+function dashSaveKpiOrder(){ try{ localStorage.setItem(DASH_STORE_KPI, JSON.stringify(DASH_KPIS.map(function(k){return k.key;}))); }catch(_){} }
+function dashSaveGraphOrder(){ try{ localStorage.setItem(DASH_STORE_GRAPH, JSON.stringify(DASH_GRAPHS.map(function(g){return g.key;}))); }catch(_){} }
+
+function dashApply(){
+  window.__dashState = Object.assign({}, DASH_STATE);
+  dashRenderKpis();
+  dashRenderGraphs();
+  if(window.Chart) dashDrawGraphs();
+}
+dashLoadOrder();
+dashApply();
+</script>
 
 </body>
 </html>
