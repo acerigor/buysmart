@@ -47,7 +47,7 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
             <thead>
               <tr>
                 <th style="width:100px;text-align:center;">Status</th>
-                <th style="text-align:center;">User</th>
+                <th style="text-align:left;padding-left:24px;">User</th>
                 <th style="text-align:center;">Contact Information</th>
                 <th style="width:180px;text-align:center;">Role</th>
               </tr>
@@ -98,9 +98,11 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
             <div class="us-add-section-head">
               <h4 class="us-add-section-title">User Information</h4>
               <div class="us-add-avatar">
-                <div class="us-add-avatar-circle">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="us-add-avatar-circle" id="us-add-avatar-circle" onclick="usAvatarPick()" data-tip="Upload a photo" aria-label="Upload a photo">
+                  <svg id="us-add-avatar-placeholder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <img id="us-add-avatar-img" alt="" style="display:none;"/>
                 </div>
+                <input type="file" id="us-add-avatar-file" accept="image/*" style="display:none;" onchange="usAvatarLoad(event)"/>
                 <div class="us-add-avatar-label">Profile Picture</div>
               </div>
             </div>
@@ -229,7 +231,7 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
               <thead>
                 <tr>
                   <th class="us-perm-desc-col">Description</th>
-                  <th colspan="2" class="us-perm-access-col">Access</th>
+                  <th class="us-perm-access-col" style="width:180px;">Access</th>
                 </tr>
               </thead>
               <tbody id="us-dw-tbody"></tbody>
@@ -269,7 +271,7 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
               <thead>
                 <tr>
                   <th class="us-perm-desc-col">Columns</th>
-                  <th colspan="2" class="us-perm-access-col">Access</th>
+                  <th class="us-perm-access-col" style="width:180px;">Access</th>
                 </tr>
               </thead>
               <tbody id="us-rp-tbody"></tbody>
@@ -289,7 +291,7 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
               <thead>
                 <tr>
                   <th class="us-perm-desc-col">Columns</th>
-                  <th colspan="2" class="us-perm-access-col">Access</th>
+                  <th class="us-perm-access-col" style="width:180px;">Access</th>
                 </tr>
               </thead>
               <tbody id="us-pp-tbody"></tbody>
@@ -309,7 +311,7 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
               <thead>
                 <tr>
                   <th class="us-perm-desc-col">Columns</th>
-                  <th colspan="2" class="us-perm-access-col">Access</th>
+                  <th class="us-perm-access-col" style="width:180px;">Access</th>
                 </tr>
               </thead>
               <tbody id="us-aa-tbody"></tbody>
@@ -381,7 +383,7 @@ function usSaveStorage(){ try{ localStorage.setItem(US_STORAGE_KEY, JSON.stringi
 function usRowHtml(u){
   return '<tr>' +
     '<td style="text-align:center;"><span class="tog' + (u.active?'':' off') + '" onclick="usToggleStatus(' + u.id + ',this)"></span></td>' +
-    '<td style="text-align:center;"><a class="us-user-link" href="javascript:void(0)" onclick="usOpenEdit(' + u.id + ')">' + usEsc(u.name) + '</a></td>' +
+    '<td style="text-align:left;padding-left:24px;"><a class="us-user-link" href="javascript:void(0)" onclick="usOpenEdit(' + u.id + ')">' + usEsc(u.name) + '</a></td>' +
     '<td style="text-align:center;">' + usEsc(u.contact) + '</td>' +
     '<td style="text-align:center;">' + usEsc(u.role) + '</td>' +
   '</tr>';
@@ -421,6 +423,7 @@ function usOpenEdit(id){
   document.getElementById('us-add-city').value     = u.city || '';
   document.getElementById('us-add-zipcode').value  = u.zipcode || '';
   document.getElementById('us-add-active').classList.toggle('off', !u.active);
+  usAvatarSet(u.avatar || null);
   usResetPanes();
   usApplyPermissions(u.permissions);
   usSwitchTab(document.querySelector('#us-add-nav .us-add-tab[data-tab="general"]'), 'general');
@@ -492,34 +495,30 @@ function usPuRender(){
 }
 
 const US_DW_PERMS = [
-  { key:'activeInventory',       label:'Active Inventory',             default:'view' },
-  { key:'assetValueChart',       label:'Asset Value Chart',            default:'view' },
-  { key:'assetSalesCycle',       label:'Asset Sales Cycle',            default:'view' },
-  { key:'salesChart',            label:'Sales Chart',                  default:'view' },
-  { key:'purchaseRatio',         label:'Purchase Ratio',               default:'view' },
-  { key:'purchaseChart',         label:'Purchase Chart',               default:'view' },
-  { key:'highestSellingChart',   label:'Highest Selling Chart',        default:'view' },
-  { key:'salePerfByLocation',    label:'Sale Performance By Location', default:'view' },
-  { key:'profitChart',           label:'Profit Chart',                 default:'view' },
-  { key:'totalAsset',            label:'Total Asset',                  default:'view' },
-  { key:'assetInAuction',        label:'Asset In Auction',             default:'view' },
-  { key:'assetsSold',            label:'Assets Sold',                  default:'view' },
-  { key:'upcomingAuction',       label:'Upcoming Auction',             default:'view' },
-  { key:'purchaseSalesAssetChart',label:'Purchase/Sales Asset Chart',  default:'view' },
+  { key:'activeInventory',       label:'Active Inventory',             on:true },
+  { key:'assetValueChart',       label:'Asset Value Chart',            on:true },
+  { key:'assetSalesCycle',       label:'Asset Sales Cycle',            on:true },
+  { key:'salesChart',            label:'Sales Chart',                  on:true },
+  { key:'purchaseRatio',         label:'Purchase Ratio',               on:true },
+  { key:'purchaseChart',         label:'Purchase Chart',               on:true },
+  { key:'highestSellingChart',   label:'Highest Selling Chart',        on:true },
+  { key:'salePerfByLocation',    label:'Sale Performance By Location', on:true },
+  { key:'profitChart',           label:'Profit Chart',                 on:true },
+  { key:'totalAsset',            label:'Total Asset',                  on:true },
+  { key:'assetInAuction',        label:'Asset In Auction',             on:true },
+  { key:'assetsSold',            label:'Assets Sold',                  on:true },
+  { key:'upcomingAuction',       label:'Upcoming Auction',             on:true },
+  { key:'purchaseSalesAssetChart',label:'Purchase/Sales Asset Chart',  on:true },
 ];
 
 function usDwRowHtml(p){
-  const n = 'us-dw-' + p.key;
-  const opts = [
-    { v:'noAccess', label:'No Access' },
-    { v:'view',     label:'View'      },
-  ];
+  const cls = p.on ? 'us-yn-tog' : 'us-yn-tog off';
+  const txt = p.on ? 'YES' : 'OFF';
   return '<tr>' +
     '<td class="us-perm-desc-cell">' + usEsc(p.label) + '</td>' +
-    opts.map(function(o){
-      const checked = p.default === o.v ? ' checked' : '';
-      return '<td class="us-perm-opt-cell"><label class="us-perm-opt"><input type="radio" name="' + n + '" value="' + o.v + '"' + checked + '/><span class="us-perm-box"></span>' + o.label + '</label></td>';
-    }).join('') +
+    '<td class="us-perm-opt-cell" style="width:180px;">' +
+      '<span class="' + cls + '" data-key="us-dw-' + p.key + '" onclick="usToggleYn(this)"><span class="us-yn-tog-txt">' + txt + '</span></span>' +
+    '</td>' +
   '</tr>';
 }
 
@@ -641,18 +640,14 @@ const US_RP_PERMS = [
 ];
 
 function usRpRowHtml(p){
-  const n = 'us-rp-' + p.key;
-  const opts = [
-    { v:'noAccess', label:'No Access' },
-    { v:'access',   label:'Access'    },
-  ];
-  const def = p.default || 'access';
+  const on = p.on !== false;
+  const cls = on ? 'us-yn-tog' : 'us-yn-tog off';
+  const txt = on ? 'YES' : 'OFF';
   return '<tr>' +
     '<td class="us-perm-desc-cell">' + usEsc(p.label) + '</td>' +
-    opts.map(function(o){
-      const checked = def === o.v ? ' checked' : '';
-      return '<td class="us-perm-opt-cell"><label class="us-perm-opt"><input type="radio" name="' + n + '" value="' + o.v + '"' + checked + '/><span class="us-perm-box"></span>' + o.label + '</label></td>';
-    }).join('') +
+    '<td class="us-perm-opt-cell" style="width:180px;">' +
+      '<span class="' + cls + '" data-key="us-rp-' + p.key + '" onclick="usToggleYn(this)"><span class="us-yn-tog-txt">' + txt + '</span></span>' +
+    '</td>' +
   '</tr>';
 }
 
@@ -707,18 +702,14 @@ const US_PP_PERMS = [
 ];
 
 function usPpRowHtml(p){
-  const n = 'us-pp-' + p.key;
-  const opts = [
-    { v:'noAccess', label:'No Access' },
-    { v:'access',   label:'Access'    },
-  ];
-  const def = p.default || 'access';
+  const on = p.on !== false;
+  const cls = on ? 'us-yn-tog' : 'us-yn-tog off';
+  const txt = on ? 'YES' : 'OFF';
   return '<tr>' +
     '<td class="us-perm-desc-cell">' + usEsc(p.label) + '</td>' +
-    opts.map(function(o){
-      const checked = def === o.v ? ' checked' : '';
-      return '<td class="us-perm-opt-cell"><label class="us-perm-opt"><input type="radio" name="' + n + '" value="' + o.v + '"' + checked + '/><span class="us-perm-box"></span>' + o.label + '</label></td>';
-    }).join('') +
+    '<td class="us-perm-opt-cell" style="width:180px;">' +
+      '<span class="' + cls + '" data-key="us-pp-' + p.key + '" onclick="usToggleYn(this)"><span class="us-yn-tog-txt">' + txt + '</span></span>' +
+    '</td>' +
   '</tr>';
 }
 
@@ -747,18 +738,14 @@ const US_AA_PERMS = [
 ];
 
 function usAaRowHtml(p){
-  const n = 'us-aa-' + p.key;
-  const opts = [
-    { v:'noAccess', label:'No Access' },
-    { v:'access',   label:'Access'    },
-  ];
-  const def = p.default || 'access';
+  const on = p.on !== false;
+  const cls = on ? 'us-yn-tog' : 'us-yn-tog off';
+  const txt = on ? 'YES' : 'OFF';
   return '<tr>' +
     '<td class="us-perm-desc-cell">' + usEsc(p.label) + '</td>' +
-    opts.map(function(o){
-      const checked = def === o.v ? ' checked' : '';
-      return '<td class="us-perm-opt-cell"><label class="us-perm-opt"><input type="radio" name="' + n + '" value="' + o.v + '"' + checked + '/><span class="us-perm-box"></span>' + o.label + '</label></td>';
-    }).join('') +
+    '<td class="us-perm-opt-cell" style="width:180px;">' +
+      '<span class="' + cls + '" data-key="us-aa-' + p.key + '" onclick="usToggleYn(this)"><span class="us-yn-tog-txt">' + txt + '</span></span>' +
+    '</td>' +
   '</tr>';
 }
 
@@ -773,11 +760,11 @@ let usEditingId = null;
 const US_PERM_SECTIONS = [
   { key:'runlistSettings',   togId:'us-rl-access-has', seed:'US_RL_PERMS', prefix:'us-rl', kind:'radios', render:function(){ usRlRender(); } },
   { key:'purchaseSettings',  togId:'us-pu-access-has', seed:'US_PU_PERMS', prefix:'us-pu', kind:'radios', render:function(){ usPuRender(); } },
-  { key:'dashboardWidgets',  togId:'us-dw-access-has', seed:'US_DW_PERMS', prefix:'us-dw', kind:'radios', render:function(){ usDwRender(); } },
+  { key:'dashboardWidgets',  togId:'us-dw-access-has', seed:'US_DW_PERMS', prefix:'us-dw', kind:'yn',     render:function(){ usDwRender(); } },
   { key:'pagePermission',    togId:'us-pg-access-has', seed:'US_PG_PERMS', prefix:'us-pg', kind:'yn',     render:function(){ usPgRender(); } },
-  { key:'runlistColumns',    togId:'us-rp-access-has', seed:'US_RP_PERMS', prefix:'us-rp', kind:'radios', render:function(){ usRpRender(); } },
-  { key:'purchaseColumns',   togId:'us-pp-access-has', seed:'US_PP_PERMS', prefix:'us-pp', kind:'radios', render:function(){ usPpRender(); } },
-  { key:'auctionAssignment', togId:'us-aa-access-has', seed:'US_AA_PERMS', prefix:'us-aa', kind:'radios', render:function(){ usAaRender(); } },
+  { key:'runlistColumns',    togId:'us-rp-access-has', seed:'US_RP_PERMS', prefix:'us-rp', kind:'yn',     render:function(){ usRpRender(); } },
+  { key:'purchaseColumns',   togId:'us-pp-access-has', seed:'US_PP_PERMS', prefix:'us-pp', kind:'yn',     render:function(){ usPpRender(); } },
+  { key:'auctionAssignment', togId:'us-aa-access-has', seed:'US_AA_PERMS', prefix:'us-aa', kind:'yn',     render:function(){ usAaRender(); } },
 ];
 
 function usSeedFor(name){
@@ -833,7 +820,7 @@ function usApplyPermissions(perms){
     seed.forEach(function(p){
       const el = document.querySelector('.us-yn-tog[data-key="' + prefix + '-' + p.key + '"]');
       if(!el) return;
-      const on = items[p.key] !== undefined ? items[p.key] : p.on;
+      const on = items[p.key] !== undefined ? items[p.key] : (p.on !== false);
       el.classList.toggle('off', !on);
       el.querySelector('.us-yn-tog-txt').textContent = on ? 'YES' : 'OFF';
     });
@@ -902,11 +889,42 @@ function usOpenAddModal(){
   document.getElementById('us-add-city').value = '';
   document.getElementById('us-add-zipcode').value = '';
   document.getElementById('us-add-active').classList.add('off');
+  usAvatarSet(null);
   usResetPanes();
   usSwitchTab(document.querySelector('#us-add-nav .us-add-tab[data-tab="general"]'), 'general');
   document.getElementById('us-add-modal').classList.add('open');
   setTimeout(function(){ document.getElementById('us-add-name').focus(); }, 30);
 }
+
+function usAvatarPick(){ document.getElementById('us-add-avatar-file').click(); }
+
+function usAvatarLoad(e){
+  const file = e.target.files && e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const img = new Image();
+    img.onload = function(){
+      const max = 256;
+      const scale = Math.min(1, max/Math.max(img.width, img.height));
+      const w = Math.round(img.width*scale), h = Math.round(img.height*scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      usAvatarSet(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function usAvatarSet(dataUrl){
+  const imgEl = document.getElementById('us-add-avatar-img');
+  const svgEl = document.getElementById('us-add-avatar-placeholder');
+  if(dataUrl){ imgEl.src = dataUrl; imgEl.style.display='block'; svgEl.style.display='none'; }
+  else       { imgEl.removeAttribute('src'); imgEl.style.display='none'; svgEl.style.display=''; }
+}
+
 function usCloseAddModal(){
   document.getElementById('us-add-modal').classList.remove('open');
 }
@@ -941,6 +959,8 @@ function usSubmitAddUser(){
   }
   const permissions = usCollectPermissions();
   const active      = !document.getElementById('us-add-active').classList.contains('off');
+  const avatarImg   = document.getElementById('us-add-avatar-img');
+  const avatar      = (avatarImg.style.display !== 'none' && avatarImg.getAttribute('src')) || '';
   if(usEditingId != null){
     const u = US_USERS.find(function(x){ return x.id === usEditingId; });
     if(u){
@@ -952,6 +972,7 @@ function usSubmitAddUser(){
       u.zipcode  = zip;
       u.active   = active;
       u.password = pw1;
+      u.avatar   = avatar;
       u.permissions = permissions;
     }
     usSaveStorage();
@@ -969,6 +990,7 @@ function usSubmitAddUser(){
       email: email,
       city: city,
       zipcode: zip,
+      avatar: avatar,
       permissions: permissions,
     });
     usSaveStorage();
