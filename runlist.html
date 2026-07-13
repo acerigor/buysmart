@@ -77,18 +77,6 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
         <div class="rl-empty-title">Select an auction to view runlist</div>
         <div class="rl-empty-sub">Click the <strong>Search Auction</strong> button above to pick an auction location.</div>
       </div>
-      <div class="tfooter">
-        <div>Showing <strong id="rl-showing">0</strong> of <strong id="rl-total">0</strong></div>
-        <div class="pgn" id="rl-pgn"></div>
-        <div class="rows-per-page-wrap">
-          <span>Rows per page</span>
-          <select class="rows-select" id="rl-rows-select" onchange="rlChangeRowsPerPage(this.value)">
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-          </select>
-        </div>
-      </div>
     </section>
   </div>
 
@@ -607,26 +595,16 @@ function rlRenderRow(r){
 function rlRender(){
   const emptyEl = document.getElementById('rl-empty');
   const tableEl = document.querySelector('.set-section .table-wrap');
-  const footerEl = document.querySelector('.set-section .tfooter');
   if(!rlCurrentLocation){
     if(emptyEl) emptyEl.style.display = 'flex';
     if(tableEl) tableEl.style.display = 'none';
-    if(footerEl) footerEl.style.display = 'none';
     return;
   }
   if(emptyEl) emptyEl.style.display = 'none';
   if(tableEl) tableEl.style.display = '';
-  if(footerEl) footerEl.style.display = '';
   rlBuildThead();
-  const perPage = rlPerPage;
   const filtered = rlFilteredData();
-  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
-  if(rlPage > totalPages) rlPage = totalPages;
-  const start = (rlPage - 1) * perPage;
-  const slice = filtered.slice(start, start + perPage);
-  document.getElementById('rl-tbody').innerHTML = slice.map(rlRenderRow).join('');
-  rlTotalRows = filtered.length;
-  rlUpdateFooter();
+  document.getElementById('rl-tbody').innerHTML = filtered.map(rlRenderRow).join('');
 }
 
 function rlToggleActive(srno, el){
@@ -899,66 +877,6 @@ function rlSort(col){
     });
   }
   rlRender();
-}
-
-/* ── Table footer (count + pagination + rows-per-page) ───────────────── */
-let rlPage = 1;
-let rlPerPage = 10;
-let rlTotalRows = 0;
-
-function rlBuildPageList(total, current){
-  if(total <= 7) return Array.from({length: total}, function(_, i){ return i + 1; });
-  const pages = [1];
-  if(current > 3) pages.push('…');
-  const lo = Math.max(2, current - 1);
-  const hi = Math.min(total - 1, current + 1);
-  for(let i = lo; i <= hi; i++) pages.push(i);
-  if(current < total - 2) pages.push('…');
-  pages.push(total);
-  return pages;
-}
-
-function rlUpdateFooter(){
-  const total = rlTotalRows;
-  const perPage = rlPerPage;
-  const totalPages = Math.max(1, Math.ceil(total / perPage));
-  if(rlPage > totalPages) rlPage = totalPages;
-
-  const showing = document.getElementById('rl-showing');
-  const totalEl = document.getElementById('rl-total');
-  if(total === 0){
-    showing.textContent = '0';
-    totalEl.textContent = '0';
-  } else {
-    const start = (rlPage - 1) * perPage + 1;
-    const end   = Math.min(rlPage * perPage, total);
-    showing.textContent = start + '–' + end;
-    totalEl.textContent = total;
-  }
-
-  const pgn = document.getElementById('rl-pgn');
-  const btns = [];
-  btns.push('<button class="pb"' + (rlPage <= 1 ? ' disabled' : '') + ' onclick="rlGoToPage(' + (rlPage - 1) + ')" title="Previous">&#8249;</button>');
-  const pageList = rlBuildPageList(totalPages, rlPage);
-  pageList.forEach(function(p){
-    if(p === '…') btns.push('<span style="padding:0 4px;color:var(--mu);">…</span>');
-    else btns.push('<button class="pb ' + (p === rlPage ? 'on' : '') + '" onclick="rlGoToPage(' + p + ')">' + p + '</button>');
-  });
-  btns.push('<button class="pb"' + (rlPage >= totalPages ? ' disabled' : '') + ' onclick="rlGoToPage(' + (rlPage + 1) + ')" title="Next">&#8250;</button>');
-  pgn.innerHTML = btns.join('');
-}
-
-function rlGoToPage(p){
-  rlPage = p;
-  if(typeof rlRender === 'function') rlRender();
-  else rlUpdateFooter();
-}
-
-function rlChangeRowsPerPage(v){
-  rlPerPage = parseInt(v, 10) || 10;
-  rlPage = 1;
-  if(typeof rlRender === 'function') rlRender();
-  else rlUpdateFooter();
 }
 
 /* ── Layout Settings modal (drag-reorder + show/hide + templates) ────── */
