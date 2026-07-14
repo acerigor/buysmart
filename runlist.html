@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="shared/settings.css">
 <link rel="stylesheet" href="shared/contact-panel.css">
 <link rel="stylesheet" href="shared/date-picker.css">
+<link rel="stylesheet" href="shared/date-range-picker.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif;}
@@ -366,6 +367,7 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
 <script src="shared/notifications.js"></script>
 <script src="shared/contact-panel.js"></script>
 <script src="shared/date-picker.js"></script>
+<script src="shared/date-range-picker.js"></script>
 <script src="shared/leads-comms.js"></script>
 <script src="shared/shell.js"></script>
 <script>
@@ -387,16 +389,44 @@ let rlCurrentLocation = (function(){
     return (saved && LOCATIONS.find(function(l){ return l.id === saved; })) ? saved : null;
   } catch(e){ return null; }
 })();
-let rlCurrentDate = ''; // filled on first calendar open; label starts as "Today"
+let rlRange = { from: null, to: null };
+const RL_STORE_RANGE = 'buysmart:rl:range';
+try {
+  const raw = localStorage.getItem(RL_STORE_RANGE);
+  if(raw){ const r = JSON.parse(raw); if(r && typeof r === 'object'){ rlRange.from = r.from || null; rlRange.to = r.to || null; } }
+} catch(_){}
 
-/* Calendar — reuse CCDatePicker */
+function rlParseRangeDate(s){
+  if(!s) return null;
+  const m = String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(!m) return null;
+  return new Date(parseInt(m[3],10), parseInt(m[1],10)-1, parseInt(m[2],10));
+}
+function rlUpdateCalLabel(){
+  const el = document.getElementById('rl-cal-label');
+  const f = rlParseRangeDate(rlRange.from);
+  const t = rlParseRangeDate(rlRange.to);
+  const MS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if(!f && !t){ el.textContent = 'Today'; return; }
+  if(f && !t){ el.textContent = MS[f.getMonth()]+' '+f.getDate()+', '+f.getFullYear(); return; }
+  if(!f && t){ el.textContent = MS[t.getMonth()]+' '+t.getDate()+', '+t.getFullYear(); return; }
+  const sameY = f.getFullYear() === t.getFullYear();
+  const left  = MS[f.getMonth()]+' '+f.getDate() + (sameY ? '' : ', '+f.getFullYear());
+  const right = MS[t.getMonth()]+' '+t.getDate()+', '+t.getFullYear();
+  el.textContent = left + ' – ' + right;
+}
+rlUpdateCalLabel();
+
+/* Calendar — CCDateRangePicker (2-month grid + Apply/Cancel) */
 document.getElementById('rl-cal-btn').addEventListener('click', function(){
-  CCDatePicker.open({
+  CCDateRangePicker.open({
     anchor: this,
-    value: rlCurrentDate,
-    onChange: function(v){
-      rlCurrentDate = v;
-      document.getElementById('rl-cal-label').textContent = v;
+    from: rlRange.from,
+    to:   rlRange.to,
+    onApply: function(v){
+      rlRange = { from: v.from, to: v.to };
+      try{ localStorage.setItem(RL_STORE_RANGE, JSON.stringify(rlRange)); }catch(_){}
+      rlUpdateCalLabel();
     }
   });
 });
