@@ -8,14 +8,16 @@
 <link rel="stylesheet" href="shared/settings.css">
 <link rel="stylesheet" href="shared/contact-panel.css">
 <link rel="stylesheet" href="shared/date-picker.css">
+<link rel="stylesheet" href="shared/date-range-picker.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif;}
 .root.main-area{height:calc(100vh - 64px);min-height:0;overflow:hidden;display:flex;flex-direction:column;}
+#root > .set-page-head{padding:10px 20px;}
 @media (max-width:640px){ .root.main-area{height:auto;min-height:0;overflow:visible;} }
 .dash-period-seg{padding:3px;}
 .dash-period-btn{font-size:12.5px;padding:6px 14px;border-radius:6px;}
-.dash-cal-btn{display:inline-flex;align-items:center;gap:8px;background:var(--sur2);border:1px solid var(--brd2);color:var(--tx);font-family:var(--font);font-size:12.5px;padding:6px 12px;border-radius:8px;cursor:pointer;transition:border-color .12s,background .12s;}
+.dash-cal-btn{display:inline-flex;align-items:center;gap:8px;background:var(--sur2);border:1px solid var(--brd2);color:var(--tx);font-family:var(--font);font-size:12.5px;padding:0 12px;height:36px;border-radius:8px;cursor:pointer;transition:border-color .12s,background .12s;}
 .dash-cal-btn:hover{border-color:var(--ac);}
 .dash-cal-btn svg{color:var(--mu);flex-shrink:0;}
 .dash-body{padding:0;display:flex;flex-direction:column;gap:24px;}
@@ -35,6 +37,30 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
 .w-drag svg{width:14px;height:14px;}
 .widget.dragging{opacity:.35;transform:scale(.98);cursor:grabbing;}
 .widget.drop-target{border-color:var(--ac);background:rgba(79,124,255,.04);box-shadow:0 0 0 2px rgba(79,124,255,.18) inset;}
+.w-kebab{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:var(--mu);cursor:pointer;border-radius:6px;transition:color .12s,background .12s;flex-shrink:0;padding:0;}
+.w-kebab:hover{color:var(--ac2);background:rgba(255,255,255,.05);}
+.w-kebab svg{width:14px;height:14px;}
+.w-menu{display:none;position:absolute;top:52px;right:10px;z-index:80;min-width:160px;background:var(--sur);border:0.5px solid var(--brd2);border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.5);}
+.w-menu.open{display:block;}
+.w-menu-item{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:12.5px;color:var(--tx);cursor:pointer;background:transparent;border:none;width:100%;font-family:var(--font);text-align:left;transition:background .1s,color .1s;}
+.w-menu-item:hover{background:rgba(255,255,255,.04);color:var(--ac2);}
+.w-menu-item svg{width:14px;height:14px;color:var(--mu);flex-shrink:0;}
+.w-menu-item:hover svg{color:var(--ac2);}
+.dash-period-drop-btn{display:none;align-items:center;gap:8px;background:var(--sur2);border:1px solid var(--brd2);color:var(--tx);font-family:var(--font);font-size:12.5px;padding:0 12px;height:36px;border-radius:8px;cursor:pointer;transition:border-color .12s,background .12s;}
+.dash-period-drop-btn:hover{border-color:var(--ac);}
+.dash-period-drop-btn svg{color:var(--mu);flex-shrink:0;}
+.dash-period-drop-menu{position:fixed;background:var(--sur2);border:1px solid var(--brd2);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.55);min-width:140px;z-index:100;overflow:hidden;padding:4px;display:none;top:0;left:0;}
+.dash-period-drop-menu.show{display:block;}
+.dash-period-drop-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px;border-radius:6px;cursor:pointer;color:var(--tx);font-size:13px;transition:background .1s;}
+.dash-period-drop-item:hover{background:rgba(255,255,255,.05);}
+.dash-period-drop-item.on{color:var(--ac);}
+.dash-period-drop-item.on::after{content:'✓';color:var(--ac);font-size:12px;}
+@media (max-width:640px){
+  .dash-period-seg{display:none;}
+  .dash-period-drop-btn{display:inline-flex;}
+  #dash-cal-btn span, #dash-widgets-btn span{display:none;}
+  #dash-cal-btn, #dash-widgets-btn{padding:0;width:36px;justify-content:center;}
+}
 .kpi{display:flex;flex-direction:column;gap:10px;}
 .kpi-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .kpi-icon svg{width:18px;height:18px;}
@@ -54,6 +80,21 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
 .widget--graph .w-body{position:relative;padding:12px 16px 16px;}
 .dash-chart{width:100%;height:220px;display:block;}
 .dash-chart-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mu);font-family:var(--font);pointer-events:none;}
+.dwp{position:fixed;background:var(--sur);border:0.5px solid var(--brd2);border-radius:10px;overflow:hidden;min-width:240px;max-height:70vh;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.35);top:0;left:0;display:none;flex-direction:column;}
+.dwp.show{display:flex;}
+.dwp-section{font-size:10.5px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:.7px;padding:12px 14px 6px;border-bottom:0.5px solid var(--brd);flex-shrink:0;}
+.dwp-list{flex:1;overflow-y:auto;}
+.dwp-item{display:flex;align-items:center;gap:10px;padding:9px 13px;cursor:pointer;border-bottom:0.5px solid var(--brd);transition:background .1s;background:transparent;border-left:none;border-right:none;border-top:none;width:100%;font-family:var(--font);text-align:left;}
+.dwp-item:last-child{border-bottom:none;}
+.dwp-item:hover{background:rgba(255,255,255,.04);}
+.dwp-check{width:16px;height:16px;border-radius:4px;flex-shrink:0;border:0.5px solid var(--brd2);background:transparent;display:flex;align-items:center;justify-content:center;color:transparent;transition:all .12s;}
+.dwp-check svg{width:11px;height:11px;}
+.dwp-item[aria-checked="true"] .dwp-check{background:var(--ac);border-color:var(--ac);color:#fff;}
+.dwp-label{flex:1;font-size:12.5px;font-weight:500;color:var(--tx);}
+.dwp-item[aria-checked="false"] .dwp-label{color:var(--mu);}
+.dwp-footer{display:flex;align-items:center;justify-content:flex-end;padding:8px;border-top:0.5px solid var(--brd);flex-shrink:0;background:var(--sur2);}
+.dwp-reset{background:transparent;border:none;color:var(--ac2);font-size:12px;font-weight:500;font-family:var(--font);cursor:pointer;padding:6px 10px;border-radius:6px;transition:background .12s;}
+.dwp-reset:hover{background:rgba(79,124,255,.10);}
 </style>
 </head>
 <body>
@@ -61,18 +102,31 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
 <div class="root main-area" id="root">
   <div class="set-page-head">
     <div class="lblp-sort-seg dash-period-seg">
-      <button class="lblp-sort-btn dash-period-btn on" data-period="today" onclick="dashSetPeriod('today', this)">Today</button>
-      <button class="lblp-sort-btn dash-period-btn"    data-period="week"  onclick="dashSetPeriod('week',  this)">Week</button>
-      <button class="lblp-sort-btn dash-period-btn"    data-period="month" onclick="dashSetPeriod('month', this)">Month</button>
-      <button class="lblp-sort-btn dash-period-btn"    data-period="all"   onclick="dashSetPeriod('all',   this)">All</button>
+      <button class="lblp-sort-btn dash-period-btn on" data-period="today" onclick="dashSetPeriod('today')">Today</button>
+      <button class="lblp-sort-btn dash-period-btn"    data-period="week"  onclick="dashSetPeriod('week')">Week</button>
+      <button class="lblp-sort-btn dash-period-btn"    data-period="month" onclick="dashSetPeriod('month')">Month</button>
+      <button class="lblp-sort-btn dash-period-btn"    data-period="all"   onclick="dashSetPeriod('all')">All</button>
     </div>
+    <button class="dash-period-drop-btn" id="dash-period-drop-btn" onclick="dashOpenPeriodDrop(event)" aria-label="Period">
+      <span id="dash-period-drop-label">Today</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
     <button class="dash-cal-btn" id="dash-cal-btn" onclick="dashOpenCalendar(event)" aria-label="Pick a date">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
       </svg>
       <span id="dash-cal-label">Today</span>
     </button>
+    <div class="sp"></div>
+    <button class="dash-cal-btn" id="dash-widgets-btn" onclick="dashOpenWidgetsPopup(event)" aria-label="Show / hide widgets">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      <span>Widgets</span>
+    </button>
   </div>
+  <div class="dwp" id="dash-widgets-popup"></div>
+  <div class="dash-period-drop-menu" id="dash-period-drop-menu"></div>
   <div class="set-scroll">
     <section class="set-section dash-body">
       <div class="dash-group">
@@ -89,29 +143,116 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
 <script src="shared/notifications.js"></script>
 <script src="shared/contact-panel.js"></script>
 <script src="shared/date-picker.js"></script>
+<script src="shared/date-range-picker.js"></script>
 <script src="shared/shell.js"></script>
 <script>BuySmartShell.init({ page: 'home', title: 'Dashboard' });</script>
 <script>
-const DASH_STATE = { period: 'today', refDate: null };
+const DASH_STATE = { period: 'today', range: { from: null, to: null } };
+const DASH_STORE_RANGE = 'buysmart:dash:range';
 
-function dashSetPeriod(period, el){
+const DASH_PERIOD_LABELS = { today:'Today', week:'Week', month:'Month', all:'All' };
+
+function dashSetPeriod(period){
   DASH_STATE.period = period;
-  document.querySelectorAll('.dash-period-btn').forEach(function(b){ b.classList.toggle('on', b === el); });
+  document.querySelectorAll('.dash-period-btn').forEach(function(b){ b.classList.toggle('on', b.dataset.period === period); });
+  document.querySelectorAll('.dash-period-drop-item').forEach(function(i){ i.classList.toggle('on', i.dataset.period === period); });
+  const label = document.getElementById('dash-period-drop-label');
+  if(label) label.textContent = DASH_PERIOD_LABELS[period] || 'Today';
   dashApply();
 }
+
+function dashRenderPeriodDrop(){
+  const items = [{k:'today',l:'Today'},{k:'week',l:'Week'},{k:'month',l:'Month'},{k:'all',l:'All'}];
+  document.getElementById('dash-period-drop-menu').innerHTML = items.map(function(o){
+    return '<div class="dash-period-drop-item' + (DASH_STATE.period === o.k ? ' on' : '') + '" data-period="' + o.k + '" onclick="dashPickPeriodDrop(\'' + o.k + '\')">' + o.l + '</div>';
+  }).join('');
+}
+function dashOpenPeriodDrop(e){
+  e.stopPropagation();
+  dashRenderPeriodDrop();
+  const menu = document.getElementById('dash-period-drop-menu');
+  menu.classList.add('show');
+  const btn = e.currentTarget;
+  const r = btn.getBoundingClientRect();
+  const mr = menu.getBoundingClientRect();
+  let top = r.bottom + 4;
+  if(top + mr.height > window.innerHeight - 8){
+    const above = r.top - mr.height - 4;
+    top = (above >= 8) ? above : Math.max(8, window.innerHeight - mr.height - 8);
+  }
+  let left = r.left;
+  if(left + mr.width > window.innerWidth - 8) left = window.innerWidth - mr.width - 8;
+  if(left < 8) left = 8;
+  menu.style.top = top + 'px';
+  menu.style.left = left + 'px';
+}
+function dashClosePeriodDrop(){
+  const m = document.getElementById('dash-period-drop-menu');
+  if(m) m.classList.remove('show');
+}
+function dashPickPeriodDrop(period){
+  dashSetPeriod(period);
+  dashClosePeriodDrop();
+}
+document.addEventListener('click', function(e){
+  const menu = document.getElementById('dash-period-drop-menu');
+  if(!menu || !menu.classList.contains('show')) return;
+  if(e.target.closest && e.target.closest('#dash-period-drop-btn')) return;
+  const r = menu.getBoundingClientRect();
+  if(e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) return;
+  dashClosePeriodDrop();
+});
+window.addEventListener('scroll', dashClosePeriodDrop, true);
+window.addEventListener('resize', dashClosePeriodDrop);
 
 function dashOpenCalendar(e){
   e.stopPropagation();
   const anchor = document.getElementById('dash-cal-btn');
-  window.CCDatePicker.open({
+  window.CCDateRangePicker.open({
     anchor: anchor,
-    value: DASH_STATE.refDate || undefined,
-    onChange: function(v){
-      DASH_STATE.refDate = v;
-      document.getElementById('dash-cal-label').textContent = v;
+    from: DASH_STATE.range.from || null,
+    to:   DASH_STATE.range.to   || null,
+    onApply: function(v){
+      DASH_STATE.range = { from: v.from, to: v.to };
+      dashSaveRange();
+      dashUpdateCalLabel();
       dashApply();
     }
   });
+}
+
+function dashParseRangeDate(s){
+  if(!s) return null;
+  const m = String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(!m) return null;
+  return new Date(parseInt(m[3],10), parseInt(m[1],10)-1, parseInt(m[2],10));
+}
+function dashUpdateCalLabel(){
+  const el = document.getElementById('dash-cal-label');
+  const f = dashParseRangeDate(DASH_STATE.range.from);
+  const t = dashParseRangeDate(DASH_STATE.range.to);
+  const MSHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if(!f && !t){ el.textContent = 'Today'; return; }
+  if(f && !t){ el.textContent = MSHORT[f.getMonth()]+' '+f.getDate()+', '+f.getFullYear(); return; }
+  if(!f && t){ el.textContent = MSHORT[t.getMonth()]+' '+t.getDate()+', '+t.getFullYear(); return; }
+  const sameY = f.getFullYear() === t.getFullYear();
+  const left  = MSHORT[f.getMonth()]+' '+f.getDate() + (sameY ? '' : ', '+f.getFullYear());
+  const right = MSHORT[t.getMonth()]+' '+t.getDate()+', '+t.getFullYear();
+  el.textContent = left + ' – ' + right;
+}
+function dashSaveRange(){
+  try{ localStorage.setItem(DASH_STORE_RANGE, JSON.stringify(DASH_STATE.range)); }catch(_){}
+}
+function dashLoadRange(){
+  try{
+    const raw = localStorage.getItem(DASH_STORE_RANGE);
+    if(!raw) return;
+    const r = JSON.parse(raw);
+    if(r && typeof r === 'object'){
+      DASH_STATE.range.from = r.from || null;
+      DASH_STATE.range.to   = r.to   || null;
+    }
+  }catch(_){}
 }
 
 const DASH_KPIS = [
@@ -131,7 +272,7 @@ function dashKpiIcon(name){
 }
 function dashRenderKpis(){
   const el = document.getElementById('dash-kpi-grid'); if(!el) return;
-  el.innerHTML = DASH_KPIS.map(function(k){
+  el.innerHTML = DASH_KPIS.filter(function(k){ return !dashHiddenKpis.has(k.key); }).map(function(k){
     return '<div class="widget" data-key="' + k.key + '">' +
       '<div class="w-head">' +
         '<div class="w-drag" onmousedown="dashDragArm(\'' + k.key + '\')" onmouseup="dashDragDisarm(\'' + k.key + '\')" title="Drag to rearrange">' +
@@ -142,6 +283,15 @@ function dashRenderKpis(){
           '</svg>' +
         '</div>' +
         '<div class="w-title">' + k.title + '</div>' +
+        '<button class="w-kebab" onclick="dashToggleKebab(event,\'kpi\',\'' + k.key + '\')" aria-label="Widget options">' +
+          '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="3" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="8" cy="13" r="1.3"/></svg>' +
+        '</button>' +
+        '<div class="w-menu" id="w-menu-kpi-' + k.key + '">' +
+          '<button class="w-menu-item" onclick="dashHideWidget(\'kpi\',\'' + k.key + '\')">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>' +
+            'Hide widget' +
+          '</button>' +
+        '</div>' +
       '</div>' +
       '<div class="w-body">' +
         '<div class="kpi kpi-' + k.variant + '">' +
@@ -314,7 +464,7 @@ function dashChartDonut(key, data){
 function dashRenderGraphs(){
   const el = document.getElementById('dash-graphs-grid'); if(!el) return;
   Object.keys(dashChartInstances).forEach(dashChartDestroy);
-  el.innerHTML = DASH_GRAPHS.map(function(g){
+  el.innerHTML = DASH_GRAPHS.filter(function(g){ return !dashHiddenGraphs.has(g.key); }).map(function(g){
     return '<div class="widget widget--graph" data-key="' + g.key + '">' +
       '<div class="w-head">' +
         '<div class="w-drag" onmousedown="dashDragArm(\'' + g.key + '\')" onmouseup="dashDragDisarm(\'' + g.key + '\')" title="Drag to rearrange">' +
@@ -325,6 +475,15 @@ function dashRenderGraphs(){
           '</svg>' +
         '</div>' +
         '<div class="w-title">' + g.title + '</div>' +
+        '<button class="w-kebab" onclick="dashToggleKebab(event,\'graph\',\'' + g.key + '\')" aria-label="Widget options">' +
+          '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="3" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="8" cy="13" r="1.3"/></svg>' +
+        '</button>' +
+        '<div class="w-menu" id="w-menu-graph-' + g.key + '">' +
+          '<button class="w-menu-item" onclick="dashHideWidget(\'graph\',\'' + g.key + '\')">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>' +
+            'Hide widget' +
+          '</button>' +
+        '</div>' +
       '</div>' +
       '<div class="w-body">' +
         '<canvas class="dash-chart" id="dash-chart-' + g.key + '"></canvas>' +
@@ -446,8 +605,12 @@ function dashDrawGraphs(){
   });
 }
 
-const DASH_STORE_KPI   = 'buysmart:dash:kpiOrder';
-const DASH_STORE_GRAPH = 'buysmart:dash:graphOrder';
+const DASH_STORE_KPI    = 'buysmart:dash:kpiOrder';
+const DASH_STORE_GRAPH  = 'buysmart:dash:graphOrder';
+const DASH_STORE_KPI_H  = 'buysmart:dash:kpiHidden';
+const DASH_STORE_GRAPH_H = 'buysmart:dash:graphHidden';
+const dashHiddenKpis   = new Set();
+const dashHiddenGraphs = new Set();
 
 function dashApplySavedOrder(arr, savedKeys){
   const byKey = {}; arr.forEach(function(x){ byKey[x.key] = x; });
@@ -466,9 +629,121 @@ function dashLoadOrder(){
     const gRaw = localStorage.getItem(DASH_STORE_GRAPH);
     if(gRaw){ const g = JSON.parse(gRaw); if(Array.isArray(g)) dashApplySavedOrder(DASH_GRAPHS, g); }
   } catch(_){}
+  try {
+    const khRaw = localStorage.getItem(DASH_STORE_KPI_H);
+    if(khRaw){ const arr = JSON.parse(khRaw); if(Array.isArray(arr)) arr.forEach(function(k){ dashHiddenKpis.add(k); }); }
+  } catch(_){}
+  try {
+    const ghRaw = localStorage.getItem(DASH_STORE_GRAPH_H);
+    if(ghRaw){ const arr = JSON.parse(ghRaw); if(Array.isArray(arr)) arr.forEach(function(k){ dashHiddenGraphs.add(k); }); }
+  } catch(_){}
 }
 function dashSaveKpiOrder(){ try{ localStorage.setItem(DASH_STORE_KPI, JSON.stringify(DASH_KPIS.map(function(k){return k.key;}))); }catch(_){} }
 function dashSaveGraphOrder(){ try{ localStorage.setItem(DASH_STORE_GRAPH, JSON.stringify(DASH_GRAPHS.map(function(g){return g.key;}))); }catch(_){} }
+function dashSaveHidden(){
+  try{ localStorage.setItem(DASH_STORE_KPI_H, JSON.stringify(Array.from(dashHiddenKpis))); }catch(_){}
+  try{ localStorage.setItem(DASH_STORE_GRAPH_H, JSON.stringify(Array.from(dashHiddenGraphs))); }catch(_){}
+}
+
+function dashOpenWidgetsPopup(e){
+  e.stopPropagation();
+  const pop = document.getElementById('dash-widgets-popup');
+  dashRenderWidgetsPopup();
+  pop.classList.add('show');
+  const btn = e.currentTarget;
+  const r = btn.getBoundingClientRect();
+  const pr = pop.getBoundingClientRect();
+  let top = r.bottom + 4;
+  if(top + pr.height > window.innerHeight - 8){
+    const above = r.top - pr.height - 4;
+    top = (above >= 8) ? above : Math.max(8, window.innerHeight - pr.height - 8);
+  }
+  let left = r.left;
+  if(left + pr.width > window.innerWidth - 8) left = window.innerWidth - pr.width - 8;
+  if(left < 8) left = 8;
+  pop.style.top = top + 'px';
+  pop.style.left = left + 'px';
+}
+function dashCloseWidgetsPopup(){
+  const pop = document.getElementById('dash-widgets-popup');
+  if(pop) pop.classList.remove('show');
+}
+function dashRenderWidgetsPopup(){
+  const pop = document.getElementById('dash-widgets-popup');
+  const CHK = '<span class="dwp-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span>';
+  const itemHtml = function(type, key, name, isOn){
+    return '<button type="button" class="dwp-item" role="menuitemcheckbox" aria-checked="' + (isOn ? 'true' : 'false') + '" data-type="' + type + '" data-key="' + key + '" onclick="dashToggleWidget(\'' + type + '\',\'' + key + '\')">' +
+      CHK + '<span class="dwp-label">' + name + '</span>' +
+    '</button>';
+  };
+  const kpiItems = DASH_KPIS.map(function(k){ return itemHtml('kpi', k.key, k.title, !dashHiddenKpis.has(k.key)); }).join('');
+  const graphItems = DASH_GRAPHS.map(function(g){ return itemHtml('graph', g.key, g.title, !dashHiddenGraphs.has(g.key)); }).join('');
+  pop.innerHTML =
+    '<div class="dwp-section">Show / hide</div>' +
+    '<div class="dwp-list">' +
+      kpiItems + graphItems +
+    '</div>' +
+    '<div class="dwp-footer"><button type="button" class="dwp-reset" onclick="dashResetWidgets()">Reset to defaults</button></div>';
+}
+function dashSyncWidgetChecks(){
+  document.querySelectorAll('#dash-widgets-popup .dwp-item').forEach(function(btn){
+    const type = btn.getAttribute('data-type');
+    const key  = btn.getAttribute('data-key');
+    const set  = (type === 'kpi') ? dashHiddenKpis : dashHiddenGraphs;
+    btn.setAttribute('aria-checked', set.has(key) ? 'false' : 'true');
+  });
+}
+function dashToggleWidget(type, key){
+  const set = (type === 'kpi') ? dashHiddenKpis : dashHiddenGraphs;
+  if(set.has(key)) set.delete(key); else set.add(key);
+  dashSaveHidden();
+  const pop = document.getElementById('dash-widgets-popup');
+  if(pop && pop.classList.contains('show')) dashSyncWidgetChecks(); else dashRenderWidgetsPopup();
+  dashApply();
+}
+function dashResetWidgets(){
+  dashHiddenKpis.clear();
+  dashHiddenGraphs.clear();
+  dashSaveHidden();
+  dashSyncWidgetChecks();
+  dashApply();
+}
+function dashToggleKebab(e, type, key){
+  if(e) e.stopPropagation();
+  const id = 'w-menu-' + type + '-' + key;
+  document.querySelectorAll('.w-menu.open').forEach(function(m){ if(m.id !== id) m.classList.remove('open'); });
+  const menu = document.getElementById(id);
+  if(menu) menu.classList.toggle('open');
+}
+function dashHideWidget(type, key){
+  const set = (type === 'kpi') ? dashHiddenKpis : dashHiddenGraphs;
+  set.add(key);
+  dashSaveHidden();
+  const pop = document.getElementById('dash-widgets-popup');
+  if(pop && pop.classList.contains('show')) dashSyncWidgetChecks();
+  dashApply();
+}
+document.addEventListener('click', function(ev){
+  document.querySelectorAll('.w-menu.open').forEach(function(m){
+    const parent = m.closest('.widget');
+    if(parent && !parent.contains(ev.target)) m.classList.remove('open');
+  });
+});
+document.addEventListener('click', function(e){
+  const pop = document.getElementById('dash-widgets-popup');
+  if(!pop || !pop.classList.contains('show')) return;
+  if(e.target.closest && e.target.closest('#dash-widgets-btn')) return;
+  const r = pop.getBoundingClientRect();
+  if(e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) return;
+  dashCloseWidgetsPopup();
+});
+window.addEventListener('scroll', function(e){
+  const pop = document.getElementById('dash-widgets-popup');
+  if(pop && pop.classList.contains('show') && !(e.target && e.target.nodeType === 1 && e.target.closest && e.target.closest('#dash-widgets-popup'))){
+    dashCloseWidgetsPopup();
+  }
+}, true);
+window.addEventListener('resize', dashCloseWidgetsPopup);
 
 function dashApply(){
   window.__dashState = Object.assign({}, DASH_STATE);
@@ -477,6 +752,8 @@ function dashApply(){
   if(window.Chart) dashDrawGraphs();
 }
 dashLoadOrder();
+dashLoadRange();
+dashUpdateCalLabel();
 dashApply();
 </script>
 
