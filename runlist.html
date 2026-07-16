@@ -18,6 +18,10 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
 .rl-remove-bucket{color:var(--rd);}
 .rl-remove-bucket:hover{border-color:var(--rd);}
 .rl-rmbk-yes{background:var(--rd)!important;border-color:var(--rd)!important;}
+.vd-comments-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.vd-comment-item{display:flex;flex-direction:column;gap:2px;padding:8px 10px;background:var(--sur2);border:0.5px solid var(--brd2);border-radius:8px;}
+.vd-comment-meta{font-size:11px;color:var(--mu);}
+.vd-comment-body{font-size:13px;color:var(--tx);line-height:1.4;word-break:break-word;}
 .rl-adv-filter{position:fixed;display:none;z-index:80;width:640px;max-width:calc(100vw - 16px);background:var(--sur);border:0.5px solid var(--brd2);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.4);color:var(--tx);font-family:var(--font);overflow:hidden;}
 .rl-adv-filter.open{display:block;}
 .rl-adv-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:0.5px solid var(--brd);}
@@ -266,10 +270,11 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
             <div class="vd-comment-input">
               <button class="ic-btn" title="Voice" onclick="rlAction('Voice comment')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
               <button class="ic-btn" title="Attach" onclick="rlAction('Attach file')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
-              <input type="text" placeholder="Add new comment here or tag Eg. @john"/>
-              <button class="ic-btn vd-send" title="Send" onclick="rlAction('Send comment')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+              <input type="text" id="vd-comment-input" placeholder="Add new comment here or tag Eg. @john" onkeydown="if(event.key==='Enter'){event.preventDefault();rlVdSendComment();}"/>
+              <button class="ic-btn vd-send" title="Send" onclick="rlVdSendComment()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
             </div>
-            <div class="vd-comments-empty">No comments found</div>
+            <div class="vd-comments-empty" id="vd-comments-empty">No comments found</div>
+            <div class="vd-comments-list" id="vd-comments-list" style="display:none;"></div>
           </div>
         </div>
       </div>
@@ -950,12 +955,178 @@ function rlOpenVehicleDetails(srno){
   document.getElementById('vd-drivetype').textContent    = m.driveType;
   document.getElementById('vd-engine').textContent       = m.engine;
   rlVdSwitchTab('specs');
+  vdRenderComments(srno);
   document.getElementById('rl-vd-modal').classList.add('open');
 }
 
 function rlCloseVehicleDetails(){
   document.getElementById('rl-vd-modal').classList.remove('open');
   rlVdSrno = null;
+}
+
+const VD_COMMENTS_PREFIX = 'buysmart:vd-comments:';
+const VD_SEED_MIN = 60 * 1000;
+const VD_SEED_HR  = 3600 * 1000;
+const VD_TEAM = [
+  { name:'Sarah Kim',     av:'SK', color:'#534AB7' },
+  { name:'James Donovan', av:'JD', color:'#22C88A' },
+  { name:'Maria Lopez',   av:'ML', color:'#B73D5B' },
+  { name:'Andre Coleman', av:'AC', color:'#0F6E56' },
+  { name:'Priya Shah',    av:'PS', color:'#3D81B7' },
+  { name:'Kevin Ng',      av:'KN', color:'#B77B3D' }
+];
+const VD_COMMENTS_SEEDS = [
+  { srno:1, offsetMs:  4 * VD_SEED_MIN, authorIdx:0, text:'Rear bumper has a small crack, but easy fix.' },
+  { srno:1, offsetMs: 22 * VD_SEED_MIN, authorIdx:1, text:'MMR looks strong — worth pushing to floor + 500.' },
+  { srno:1, offsetMs:  3 * VD_SEED_HR,  authorIdx:2, text:'Interior in great shape for the mileage.' },
+  { srno:2, offsetMs: 15 * VD_SEED_MIN, authorIdx:3, text:'Prior lease — expect wear on driver seat.' },
+  { srno:2, offsetMs:  2 * VD_SEED_HR,  authorIdx:4, text:'Carfax clean, no accidents reported.' },
+  { srno:3, offsetMs: 40 * VD_SEED_MIN, authorIdx:5, text:'Structural alteration flagged — needs inspection.' },
+  { srno:3, offsetMs:  5 * VD_SEED_HR,  authorIdx:0, text:'Skipping. Too much risk on the frame.' },
+  { srno:4, offsetMs: 55 * VD_SEED_MIN, authorIdx:2, text:'Hail damage + prior lease + title absent. Pass.' },
+  { srno:5, offsetMs: 30 * VD_SEED_MIN, authorIdx:3, text:'Priced right for the trim. Bidding.' },
+  { srno:5, offsetMs:  4 * VD_SEED_HR,  authorIdx:1, text:'Full service records on file — nice find.' }
+];
+function vdCommentsKey(srno){ return VD_COMMENTS_PREFIX + srno; }
+function vdLoadComments(srno){
+  try { var v = JSON.parse(localStorage.getItem(vdCommentsKey(srno)) || '[]'); return Array.isArray(v) ? v : []; }
+  catch(e){ return []; }
+}
+function vdSaveComments(srno, list){
+  try { localStorage.setItem(vdCommentsKey(srno), JSON.stringify(list)); } catch(e){}
+}
+function vdRelTime(ts){
+  var d = (Date.now() - ts) / 1000;
+  if(d < 45) return 'Just now';
+  if(d < 3600) return Math.round(d/60) + 'm ago';
+  if(d < 86400) return Math.round(d/3600) + 'h ago';
+  return new Date(ts).toLocaleDateString();
+}
+function vdRenderComments(srno){
+  var list = vdLoadComments(srno);
+  var empty = document.getElementById('vd-comments-empty');
+  var wrap  = document.getElementById('vd-comments-list');
+  if(!list.length){
+    if(empty) empty.style.display = '';
+    if(wrap){ wrap.style.display = 'none'; wrap.innerHTML = ''; }
+    return;
+  }
+  if(empty) empty.style.display = 'none';
+  if(wrap){
+    wrap.style.display = '';
+    wrap.innerHTML = list.slice().reverse().map(function(c){
+      var who = c.author || 'You';
+      return '<div class="vd-comment-item"><div class="vd-comment-meta">' + esc(who) + ' · ' + vdRelTime(c.ts) + '</div><div class="vd-comment-body">' + esc(c.text) + '</div></div>';
+    }).join('');
+  }
+}
+
+function vdSeedComments(){
+  const SEEDED_FLAG_KEY  = 'buysmart:vd-comments:seeded';
+  const SEEDED_FLAG_ONCE = '2';
+  try { if(localStorage.getItem(SEEDED_FLAG_KEY) === SEEDED_FLAG_ONCE) return; } catch(e){}
+
+  const seedSrnos = Array.from(new Set(VD_COMMENTS_SEEDS.map(function(s){ return s.srno; })));
+  var canReset = true;
+  try {
+    for(var i=0;i<localStorage.length;i++){
+      var k = localStorage.key(i);
+      if(!k || k.indexOf(VD_COMMENTS_PREFIX) !== 0 || k === SEEDED_FLAG_KEY) continue;
+      var srno = parseInt(k.slice(VD_COMMENTS_PREFIX.length), 10);
+      var list = JSON.parse(localStorage.getItem(k) || '[]');
+      var hasAuthorless = Array.isArray(list) && list.some(function(c){ return c && !c.author; });
+      var isSeedSrno    = seedSrnos.indexOf(srno) !== -1;
+      if(!hasAuthorless || !isSeedSrno){ canReset = false; break; }
+    }
+  } catch(e){ canReset = false; }
+
+  if(!canReset){
+    try { localStorage.setItem(SEEDED_FLAG_KEY, SEEDED_FLAG_ONCE); } catch(e){}
+    return;
+  }
+
+  try {
+    var toRemove = [];
+    for(var j=0;j<localStorage.length;j++){
+      var kk = localStorage.key(j);
+      if(kk && kk.indexOf(VD_COMMENTS_PREFIX) === 0 && kk !== SEEDED_FLAG_KEY) toRemove.push(kk);
+    }
+    toRemove.forEach(function(kkk){ localStorage.removeItem(kkk); });
+    var raw = JSON.parse(localStorage.getItem('cc_notifications') || '[]');
+    if(Array.isArray(raw)){
+      var kept = raw.filter(function(n){ return n && n.type !== 'comment'; });
+      localStorage.setItem('cc_notifications', JSON.stringify(kept));
+    }
+  } catch(e){}
+
+  const now = Date.now();
+  const bySrno = {};
+  VD_COMMENTS_SEEDS.forEach(function(s){
+    if(!bySrno[s.srno]) bySrno[s.srno] = [];
+    var p = VD_TEAM[s.authorIdx % VD_TEAM.length];
+    bySrno[s.srno].push({
+      text: s.text,
+      ts: now - (s.offsetMs || 0),
+      author: p.name, av: p.av, color: p.color
+    });
+  });
+  Object.keys(bySrno).forEach(function(srno){
+    var list = bySrno[srno].sort(function(a,b){ return a.ts - b.ts; });
+    vdSaveComments(parseInt(srno,10), list);
+    var row = RUNLIST_DATA.find(function(r){ return r.srno === parseInt(srno,10); });
+    var vehLabel = row ? (row.year + ' ' + row.make + ' ' + row.model) : ('Vehicle #' + srno);
+    var vin      = row ? row.vin : '';
+    list.forEach(function(c){
+      if(typeof window.ccNotifAdd === 'function'){
+        window.ccNotifAdd({
+          type:'comment',
+          leadNo: parseInt(srno,10),
+          leadName: c.author || 'You',
+          leadAv:   c.av     || 'BS',
+          leadColor:c.color  || '#22c88a',
+          title:'New comment · ' + vehLabel,
+          body: c.text,
+          ts: c.ts,
+          read: (now - c.ts) > (2 * VD_SEED_HR),
+          vdSrno: parseInt(srno,10),
+          vdVin: vin
+        });
+      }
+    });
+  });
+  try { localStorage.setItem(SEEDED_FLAG_KEY, SEEDED_FLAG_ONCE); } catch(e){}
+}
+
+function rlVdSendComment(){
+  if(rlVdSrno == null) return;
+  var inp = document.getElementById('vd-comment-input');
+  if(!inp) return;
+  var text = inp.value.trim();
+  if(!text) return;
+  var srno = rlVdSrno;
+  var row  = RUNLIST_DATA.find(function(r){ return r.srno === srno; });
+  var vehLabel = row ? (row.year + ' ' + row.make + ' ' + row.model) : ('Vehicle #' + srno);
+  var vin      = row ? row.vin : '';
+  var list = vdLoadComments(srno);
+  var ts = Date.now();
+  list.push({ text: text, ts: ts });
+  vdSaveComments(srno, list);
+  vdRenderComments(srno);
+  inp.value = '';
+  if(typeof window.ccNotifAdd === 'function'){
+    window.ccNotifAdd({
+      type:'comment',
+      leadNo: srno,
+      leadName:'You',
+      leadAv:'BS',
+      leadColor:'#22c88a',
+      title:'New comment · ' + vehLabel,
+      body: text,
+      ts: ts,
+      read:false,
+      vdSrno: srno, vdVin: vin
+    });
+  }
 }
 
 function rlVdSwitchTab(key){
@@ -1952,7 +2123,21 @@ if(rlCurrentLocation){
 
 // Paint the table body
 if(_bkId){ rlLoadAdvConditions(); }
+vdSeedComments();
 rlRender();
+
+try {
+  var _vdParam = new URLSearchParams(location.search).get('vd');
+  if(_vdParam){
+    var _vdSrno = parseInt(_vdParam, 10);
+    if(!isNaN(_vdSrno)){
+      if(!rlCurrentLocation && Array.isArray(LOCATIONS) && LOCATIONS.length){
+        rlCurrentLocation = LOCATIONS[0].id;
+      }
+      setTimeout(function(){ rlOpenVehicleDetails(_vdSrno); }, 0);
+    }
+  }
+} catch(e){}
 
 /* Kebab menu */
 function toggleRunlistKebab(e){
