@@ -77,7 +77,7 @@
     '    <div class="sb-item" data-nav="bid queue" data-label="Bid Queue" onclick="navClick(\'Bid Queue\')">',
     '      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
     '    </div>',
-    '    <div class="sb-item" data-nav="add new bucket" data-label="Add New Bucket" onclick="navClick(\'Add New Bucket\')">',
+    '    <div class="sb-item" id="sb-add-bucket" data-nav="add new bucket" data-label="Add New Bucket" onclick="navClick(\'Add New Bucket\')">',
     '      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
     '    </div>',
     '    <div class="sidebar-nav-spacer"></div>',
@@ -124,7 +124,7 @@
     '      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
     '      <span>Bid Queue</span>',
     '    </div>',
-    '    <div class="md-item" data-nav="add new bucket" onclick="navClick(\'Add New Bucket\');closeMobileDrawer();">',
+    '    <div class="md-item" id="md-add-bucket" data-nav="add new bucket" onclick="navClick(\'Add New Bucket\');closeMobileDrawer();">',
     '      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
     '      <span>Add New Bucket</span>',
     '    </div>',
@@ -156,6 +156,33 @@
     '    <span id="nav-toast-body">This section is under construction.</span>',
     '  </div>',
     '  <button class="nav-toast-close" onclick="hideNavToast()" title="Dismiss">&#x2715;</button>',
+    '</div>',
+
+    '<div class="modal-backdrop modal-fullscreen-mobile" id="bucket-modal" onclick="if(event.target===this)closeAddBucketModal()">',
+    '  <div class="modal modal--wide">',
+    '    <div class="modal-header">',
+    '      <div class="modal-title">Add New Bucket</div>',
+    '      <button class="modal-close" onclick="closeAddBucketModal()" aria-label="Close">&#x2715;</button>',
+    '    </div>',
+    '    <div class="modal-body">',
+    '      <div class="us-add-section" style="grid-template-columns:1fr;">',
+    '        <div class="us-add-field" style="grid-column:auto;margin-top:0;">',
+    '          <div class="bk-radio-row">',
+    '            <label class="bk-radio"><input type="radio" name="bk-type" value="IDMS"/> <span>IDMS</span></label>',
+    '            <label class="bk-radio"><input type="radio" name="bk-type" value="Runlist" checked/> <span>Runlist</span></label>',
+    '          </div>',
+    '        </div>',
+    '        <div class="us-add-field" style="grid-column:auto;margin-top:0;">',
+    '          <label><span class="bk-req">*</span> Bucket Name</label>',
+    '          <input type="text" id="bk-name" placeholder="Enter Bucket Name" style="width:100%;" oninput="bkSyncSave()"/>',
+    '        </div>',
+    '      </div>',
+    '    </div>',
+    '    <div class="modal-footer" style="justify-content:flex-end;">',
+    '      <button class="modal-save" id="bk-save" onclick="saveAddBucket()" disabled>Save</button>',
+    '      <button class="modal-cancel" onclick="closeAddBucketModal()">Cancel</button>',
+    '    </div>',
+    '  </div>',
     '</div>',
 
     '<div class="modal-backdrop modal-fullscreen-mobile" id="queue-modal" onclick="if(event.target===this)closeQueueModal()">',
@@ -220,6 +247,15 @@
       window.openQueueModal(label);
       return;
     }
+    if(label === 'Add New Bucket'){
+      window.openAddBucketModal();
+      return;
+    }
+    if(typeof label === 'string' && label.indexOf('bucket:') === 0){
+      var _bid = label.slice(7);
+      window.location.href = 'runlist.html?bucket=' + encodeURIComponent(_bid);
+      return;
+    }
     if(NAV_ROUTES[label]){
       window.location.href = NAV_ROUTES[label];
       return;
@@ -241,6 +277,101 @@
     document.getElementById('queue-empty').style.display = 'block';
     m.classList.add('open');
   };
+  var BUCKETS_STORE = 'buysmart:buckets';
+  var BUCKET_ICON_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18l-2 12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L3 7z"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+
+  function loadBuckets(){
+    try { var v = JSON.parse(localStorage.getItem(BUCKETS_STORE) || '[]'); return Array.isArray(v) ? v : []; }
+    catch(e){ return []; }
+  }
+  function saveBuckets(list){
+    try { localStorage.setItem(BUCKETS_STORE, JSON.stringify(list)); } catch(e){}
+  }
+  function bkEscape(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  window.renderBuckets = function(){
+    var list = loadBuckets();
+    document.querySelectorAll('.sb-bucket, .md-bucket').forEach(function(el){ el.remove(); });
+
+    var sbAnchor = document.getElementById('sb-add-bucket');
+    var mdAnchor = document.getElementById('md-add-bucket');
+
+    // Insert in reverse so items appear in list order directly after the anchor.
+    for(var i = list.length - 1; i >= 0; i--){
+      var b = list[i];
+      var label = bkEscape(b.name);
+      var nav   = 'bucket:' + b.id;
+
+      if(sbAnchor){
+        var sb = document.createElement('div');
+        sb.className = 'sb-item sb-bucket';
+        sb.setAttribute('data-nav', nav);
+        sb.setAttribute('data-label', label);
+        sb.setAttribute('data-tooltip', label);
+        sb.setAttribute('onclick', "navClick('" + nav + "')");
+        sb.innerHTML = BUCKET_ICON_SVG;
+        sbAnchor.parentNode.insertBefore(sb, sbAnchor.nextSibling);
+      }
+      if(mdAnchor){
+        var md = document.createElement('div');
+        md.className = 'md-item md-bucket';
+        md.setAttribute('data-nav', nav);
+        md.setAttribute('onclick', "navClick('" + nav + "');closeMobileDrawer();");
+        md.innerHTML = BUCKET_ICON_SVG + '<span>' + label + '</span>';
+        mdAnchor.parentNode.insertBefore(md, mdAnchor.nextSibling);
+      }
+    }
+
+    var params = new URLSearchParams(location.search);
+    var activeNav = params.get('bucket') ? 'bucket:' + params.get('bucket') : null;
+    if(activeNav){
+      document.querySelectorAll('.sb-item, .md-item').forEach(function(el){
+        el.classList.toggle('active', el.getAttribute('data-nav') === activeNav);
+      });
+    }
+  };
+
+  window.openAddBucketModal = function(){
+    var m = document.getElementById('bucket-modal');
+    if(!m) return;
+    var runlist = m.querySelector('input[name="bk-type"][value="Runlist"]');
+    if(runlist) runlist.checked = true;
+    var name = document.getElementById('bk-name');
+    if(name){ name.value = ''; }
+    var save = document.getElementById('bk-save');
+    if(save) save.disabled = true;
+    m.classList.add('open');
+    setTimeout(function(){ if(name) name.focus(); }, 30);
+  };
+  window.closeAddBucketModal = function(){
+    var m = document.getElementById('bucket-modal');
+    if(m) m.classList.remove('open');
+  };
+  window.bkSyncSave = function(){
+    var save = document.getElementById('bk-save');
+    var name = document.getElementById('bk-name');
+    if(!save || !name) return;
+    save.disabled = name.value.trim().length === 0;
+  };
+  window.saveAddBucket = function(){
+    var name = document.getElementById('bk-name').value.trim();
+    if(!name){ return; }
+    var type = 'Runlist';
+    var checked = document.querySelector('input[name="bk-type"]:checked');
+    if(checked) type = checked.value;
+    var list = loadBuckets();
+    var id = 'bk_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    list.push({ id: id, name: name, type: type });
+    saveBuckets(list);
+    window.renderBuckets();
+    window.closeAddBucketModal();
+    if(typeof window.showNavToast === 'function'){
+      window.showNavToast('Bucket added', type + ' bucket "' + name + '" created.');
+    }
+  };
+
   window.closeQueueModal = function(){
     var m = document.getElementById('queue-modal');
     if(m) m.classList.remove('open');
@@ -345,6 +476,9 @@
 
       // Populate notifications now that markup is in the DOM.
       if(typeof window.renderNotifications === 'function') window.renderNotifications();
+
+      // Render user-created buckets into the sidebar + mobile drawer.
+      if(typeof window.renderBuckets === 'function') window.renderBuckets();
     }
   };
 })();
