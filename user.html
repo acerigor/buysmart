@@ -90,6 +90,7 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
         <div class="us-add-tab" data-tab="runlist-perm" onclick="usSwitchTab(this,'runlist-perm')">Runlist Permission</div>
         <div class="us-add-tab" data-tab="purchase-perm" onclick="usSwitchTab(this,'purchase-perm')">Purchase Permission</div>
         <div class="us-add-tab" data-tab="auction-assign" onclick="usSwitchTab(this,'auction-assign')">Auction Assignment</div>
+        <div class="us-add-tab" data-tab="notifications" onclick="usSwitchTab(this,'notifications')">Notifications</div>
       </aside>
       <div class="us-add-content">
         <!-- General Information pane -->
@@ -318,6 +319,21 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
             </table>
           </div>
         </div>
+        <div class="us-add-pane" data-pane="notifications">
+          <div class="us-add-section" style="grid-template-columns:1fr;">
+            <div class="us-add-section-head">
+              <h4 class="us-add-section-title">Notification Preferences</h4>
+            </div>
+            <div class="us-add-toggle-row" style="grid-column:auto;">
+              <span>Email</span>
+              <span class="tog" id="us-add-notif-email" onclick="this.classList.toggle('off')"></span>
+            </div>
+            <div class="us-add-toggle-row" style="grid-column:auto;">
+              <span>SMS</span>
+              <span class="tog" id="us-add-notif-sms" onclick="this.classList.toggle('off')"></span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -423,6 +439,9 @@ function usOpenEdit(id){
   document.getElementById('us-add-city').value     = u.city || '';
   document.getElementById('us-add-zipcode').value  = u.zipcode || '';
   document.getElementById('us-add-active').classList.toggle('off', !u.active);
+  const notif = (u.notifications && typeof u.notifications === 'object') ? u.notifications : { email:true, sms:true };
+  document.getElementById('us-add-notif-email').classList.toggle('off', !notif.email);
+  document.getElementById('us-add-notif-sms').classList.toggle('off', !notif.sms);
   usAvatarSet(u.avatar || null);
   usResetPanes();
   usApplyPermissions(u.permissions);
@@ -889,6 +908,8 @@ function usOpenAddModal(){
   document.getElementById('us-add-city').value = '';
   document.getElementById('us-add-zipcode').value = '';
   document.getElementById('us-add-active').classList.add('off');
+  document.getElementById('us-add-notif-email').classList.remove('off');
+  document.getElementById('us-add-notif-sms').classList.remove('off');
   usAvatarSet(null);
   usResetPanes();
   usSwitchTab(document.querySelector('#us-add-nav .us-add-tab[data-tab="general"]'), 'general');
@@ -959,6 +980,10 @@ function usSubmitAddUser(){
   }
   const permissions = usCollectPermissions();
   const active      = !document.getElementById('us-add-active').classList.contains('off');
+  const notifications = {
+    email: !document.getElementById('us-add-notif-email').classList.contains('off'),
+    sms:   !document.getElementById('us-add-notif-sms').classList.contains('off')
+  };
   const avatarImg   = document.getElementById('us-add-avatar-img');
   const avatar      = (avatarImg.style.display !== 'none' && avatarImg.getAttribute('src')) || '';
   if(usEditingId != null){
@@ -974,6 +999,7 @@ function usSubmitAddUser(){
       u.password = pw1;
       u.avatar   = avatar;
       u.permissions = permissions;
+      u.notifications = notifications;
     }
     usSaveStorage();
     usRender();
@@ -992,6 +1018,7 @@ function usSubmitAddUser(){
       zipcode: zip,
       avatar: avatar,
       permissions: permissions,
+      notifications: notifications,
     });
     usSaveStorage();
     usRender();
