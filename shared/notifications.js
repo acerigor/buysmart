@@ -9,10 +9,11 @@
    ============================================================================ */
 (function(){
   var KEY = 'cc_notifications';
-  var TYPES = ['sms','email','call','appt'];
-  var TAB_LABELS = { all:'All', unread:'Unread', sms:'SMS', email:'Emails', call:'Calls', appt:'Appointments' };
+  var TYPES = ['sms','email','call','appt','comment'];
+  var TAB_LABELS = { all:'All', unread:'Unread', sms:'SMS', email:'Emails', call:'Calls', appt:'Appointments', comment:'Comments' };
   var _list = null;
   var _currentTab = 'all';
+  var _search = '';
 
   /* ── persistence ─────────────────────────────────────────────────────── */
   function load(){
@@ -123,10 +124,11 @@
     sms:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>',
     email: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
     call:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
-    appt:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
+    appt:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    comment: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
   };
-  var TYPE_COLOR = { sms:'#2dd4bf', email:'#6e9dff', call:'#e85555', appt:'#f5a623' };
-  var TYPE_BGTINT = { sms:'rgba(45,212,191,.14)', email:'rgba(110,157,255,.14)', call:'rgba(232,85,85,.14)', appt:'rgba(245,166,35,.14)' };
+  var TYPE_COLOR = { sms:'#2dd4bf', email:'#6e9dff', call:'#e85555', appt:'#f5a623', comment:'#a78bfa' };
+  var TYPE_BGTINT = { sms:'rgba(45,212,191,.14)', email:'rgba(110,157,255,.14)', call:'rgba(232,85,85,.14)', appt:'rgba(245,166,35,.14)', comment:'rgba(167,139,250,.14)' };
 
   function rowHtml(n){
     var typeBg = TYPE_BGTINT[n.type]||'rgba(255,255,255,.06)', typeFg = TYPE_COLOR[n.type]||'#6e9dff';
@@ -146,23 +148,27 @@
     if(tab==='unread') return unread();
     return byType(tab);
   }
+  function applySearch(list){
+    var q = String(_search||'').trim().toLowerCase();
+    if(!q) return list;
+    return list.filter(function(n){
+      return (String(n.title||'').toLowerCase().indexOf(q) !== -1) ||
+             (String(n.body ||'').toLowerCase().indexOf(q) !== -1) ||
+             (String(n.leadName||'').toLowerCase().indexOf(q) !== -1) ||
+             (String(n.type ||'').toLowerCase().indexOf(q) !== -1);
+    });
+  }
   function render(tab){
     if(tab) _currentTab = tab;
     var body = document.getElementById('notif-body'); if(!body) return;
-    var list = listFor(_currentTab);
+    var list = applySearch(listFor(_currentTab));
     if(!list.length){
-      body.innerHTML = '<div class="notif-empty"><div class="notif-empty-icon">🔔</div>You\'re all caught up</div>';
+      body.innerHTML = '<div class="notif-empty"><div class="notif-empty-icon">🔔</div>' + (_search ? 'No matches' : 'You\'re all caught up') + '</div>';
     } else {
       body.innerHTML = list.map(rowHtml).join('');
     }
-    // tab counts
-    var counts = { all: all().length, unread: unread().length, sms: byType('sms').length, email: byType('email').length, call: byType('call').length, appt: byType('appt').length };
-    Object.keys(counts).forEach(function(k){
-      var el = document.getElementById('notif-count-'+k);
-      if(el) el.textContent = counts[k];
-    });
     // markall button enabled state
-    var ma = document.getElementById('notif-markall'); if(ma) ma.disabled = counts.unread === 0;
+    var ma = document.getElementById('notif-markall'); if(ma) ma.disabled = unread().length === 0;
   }
   function syncBellDot(){
     var dot = document.getElementById('header-bell-dot');
@@ -178,6 +184,15 @@
     var url;
     // SMS / Email: open the inline contact panel on the CURRENT page if available;
     // fall back to navigating to the leads page if no inline panel is loaded.
+    if(n.type === 'comment'){
+      try { if(typeof window.closeNotifications === 'function') window.closeNotifications(); } catch(e){}
+      if(typeof window.rlOpenVehicleDetails === 'function' && n.vdSrno != null){
+        window.rlOpenVehicleDetails(n.vdSrno);
+        return;
+      }
+      window.location.href = 'runlist.html?vd=' + encodeURIComponent(n.vdSrno || '');
+      return;
+    }
     if(n.type==='sms' || n.type==='email'){
       if(typeof window.openContactPanel === 'function'){
         try{ if(typeof window.closeNotifications === 'function') window.closeNotifications(); }catch(e){}
@@ -215,41 +230,33 @@
       + '.cc-ntf-row.is-unread{background:rgba(79,124,255,.04);}'
       + '.notif-tab.icon-tab{padding:10px 10px;gap:5px;}'
       + '.notif-tab .nt-ic{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;}'
-      + '.notif-tab .nt-ic svg{width:16px;height:16px;display:block;}';
+      + '.notif-tab .nt-ic svg{width:16px;height:16px;display:block;}'
+      + '.notif-tabs:has(.notif-search){padding:10px 14px;border-bottom:0.5px solid var(--brd);}'
+      + '.notif-search{position:relative;display:flex;align-items:center;width:100%;}'
+      + '.notif-search-ic{position:absolute;left:10px;width:14px;height:14px;color:var(--mu);pointer-events:none;}'
+      + '.notif-search-input{width:100%;height:34px;padding:0 12px 0 32px;background:var(--sur2);border:0.5px solid var(--brd2);border-radius:8px;color:var(--tx);font-family:var(--font);font-size:13px;outline:none;transition:border-color .15s;}'
+      + '.notif-search-input:focus{border-color:var(--ac);}'
+      + '.notif-search-input::placeholder{color:var(--mu);}';
     var st = document.createElement('style'); st.id='cc-ntf-style'; st.textContent = css; document.head.appendChild(st);
   }
 
   /* ── extend tabs with per-type tabs (idempotent) ─────────────────────── */
   var TAB_ICONS = {
     unread: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><circle cx="18" cy="6" r="3" fill="currentColor" stroke="none"/></svg>',
-    sms: ICONS.sms, email: ICONS.email, call: ICONS.call, appt: ICONS.appt
+    sms: ICONS.sms, email: ICONS.email, call: ICONS.call, appt: ICONS.appt, comment: ICONS.comment
   };
   function iconTabInner(key){
     return '<span class="nt-ic">'+TAB_ICONS[key]+'</span><span class="notif-tab-count" id="notif-count-'+key+'">0</span>';
   }
   function extendTabs(){
     var tabs = document.querySelector('.notif-tabs'); if(!tabs) return;
-    if(tabs.querySelector('.notif-tab[data-tab="sms"]')) return; // already extended
-    // Convert existing Unread tab to icon
-    var unreadBtn = tabs.querySelector('.notif-tab[data-tab="unread"]');
-    if(unreadBtn){
-      unreadBtn.classList.add('icon-tab');
-      unreadBtn.setAttribute('title','Unread');
-      unreadBtn.setAttribute('aria-label','Unread');
-      unreadBtn.innerHTML = iconTabInner('unread');
-    }
-    // Append the 4 type tabs as icon tabs
-    function mkIconTab(key){
-      var b = document.createElement('button');
-      b.className='notif-tab icon-tab';
-      b.setAttribute('data-tab', key);
-      b.setAttribute('onclick', "setNotifTab('"+key+"')");
-      b.setAttribute('title', TAB_LABELS[key]);
-      b.setAttribute('aria-label', TAB_LABELS[key]);
-      b.innerHTML = iconTabInner(key);
-      return b;
-    }
-    ['sms','email','call','appt'].forEach(function(k){ tabs.appendChild(mkIconTab(k)); });
+    if(tabs.querySelector('.notif-search-input')) return; // already replaced
+    tabs.innerHTML =
+      '<div class="notif-search">' +
+        '<svg class="notif-search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>' +
+        '<input class="notif-search-input" type="text" placeholder="Search notifications…" oninput="setNotifSearch(this.value)"/>' +
+      '</div>';
+    _currentTab = 'all';
   }
 
   /* ── override per-page placeholder functions ─────────────────────────── */
@@ -268,6 +275,10 @@
       document.querySelectorAll('.notif-tab').forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-tab')===tab); });
       render(tab);
     };
+    window.setNotifSearch = function(q){
+      _search = q || '';
+      render(_currentTab);
+    };
     window.markAllNotificationsRead = function(){ markAllRead(); };
     window.ccNotifClickRow = clickRow;
   }
@@ -285,9 +296,15 @@
   window.ccNotifSyncBellDot = syncBellDot;
   window.ccNotifClickRow = clickRow;
 
+  function purgeSeed(){
+    load();
+    var before = _list.length;
+    _list = _list.filter(function(n){ return !(n && typeof n.id === 'string' && n.id.indexOf('ntf_seed_') === 0); });
+    if(_list.length !== before) save();
+  }
   function init(){
     injectCss();
-    seed();
+    purgeSeed();
     extendTabs();
     installOverrides();
     render(_currentTab);
