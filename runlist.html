@@ -15,6 +15,39 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
 .root.main-area{height:calc(100vh - 64px);min-height:0;overflow:hidden;display:flex;flex-direction:column;position:relative;}
 @media (max-width:640px){ .root.main-area{height:auto;min-height:0;overflow:visible;} }
 .set-page-head{flex-wrap:wrap;}
+.rl-remove-bucket{color:var(--rd);}
+.rl-remove-bucket:hover{border-color:var(--rd);}
+.rl-rmbk-yes{background:var(--rd)!important;border-color:var(--rd)!important;}
+.rl-adv-filter{position:fixed;display:none;z-index:80;width:640px;max-width:calc(100vw - 16px);background:var(--sur);border:0.5px solid var(--brd2);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.4);color:var(--tx);font-family:var(--font);overflow:hidden;}
+.rl-adv-filter.open{display:block;}
+.rl-adv-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:0.5px solid var(--brd);}
+.rl-adv-title{display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:600;color:var(--tx);}
+.rl-adv-close{background:transparent;border:none;color:var(--mu);font-size:16px;cursor:pointer;padding:4px 6px;border-radius:6px;line-height:1;}
+.rl-adv-close:hover{background:var(--sur2);color:var(--tx);}
+.rl-adv-body{padding:16px;max-height:calc(100vh - 160px);overflow:auto;}
+.rl-adv-section{background:var(--sur2);border:0.5px solid var(--brd2);border-radius:10px;padding:14px 16px;}
+.rl-adv-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.rl-adv-section-title{font-size:13px;font-weight:600;color:var(--mu);}
+.rl-adv-clear{display:inline-flex;align-items:center;gap:6px;background:transparent;border:0.5px solid var(--brd2);color:var(--tx);font-size:12px;font-weight:500;font-family:var(--font);padding:6px 10px;border-radius:6px;cursor:pointer;}
+.rl-adv-clear:hover{background:var(--sur);border-color:var(--brd);}
+.rl-adv-conditions{display:flex;flex-direction:column;gap:8px;}
+.rl-adv-row{display:grid;grid-template-columns:56px 1fr 120px 1fr 28px;align-items:center;gap:8px;}
+.rl-adv-where{font-size:12px;font-weight:600;color:var(--mu);text-align:left;padding-left:4px;}
+.rl-adv-row select,.rl-adv-row input{height:34px;padding:0 10px;background:var(--sur);border:0.5px solid var(--brd2);border-radius:6px;color:var(--tx);font-family:var(--font);font-size:13px;outline:none;transition:border-color .15s;width:100%;}
+.rl-adv-row select:focus,.rl-adv-row input:focus{border-color:var(--ac);}
+.rl-adv-row input::placeholder{color:var(--mu);}
+.rl-adv-rm{width:28px;height:28px;background:transparent;border:none;color:var(--mu);cursor:pointer;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;}
+.rl-adv-rm:hover{background:var(--sur);color:var(--rd);}
+.rl-adv-footer{display:flex;justify-content:flex-end;margin-top:12px;}
+.rl-adv-add{display:inline-flex;align-items:center;gap:6px;background:transparent;border:none;color:var(--ac);font-size:13px;font-weight:600;font-family:var(--font);padding:6px 4px;cursor:pointer;}
+.rl-adv-add:hover{color:var(--ac2);}
+.rl-adv-empty{font-size:12px;color:var(--mu);padding:8px 4px;}
+.rl-adv-actions{display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:0.5px solid var(--brd);}
+@media (max-width:640px){
+  .rl-adv-filter{width:calc(100vw - 16px);}
+  .rl-adv-row{grid-template-columns:1fr;}
+  .rl-adv-where{padding-left:0;}
+}
 </style>
 </head>
 <body>
@@ -353,6 +386,59 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
     </div>
   </div>
 
+  <!-- Advanced filter popup (bucket view) -->
+  <div class="rl-adv-filter" id="rl-adv-filter" onclick="event.stopPropagation()">
+    <div class="rl-adv-header">
+      <div class="rl-adv-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        <span>Filter</span>
+      </div>
+      <button class="rl-adv-close" onclick="rlCloseAdvFilter()" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="rl-adv-body">
+      <div class="rl-adv-section">
+        <div class="rl-adv-section-head">
+          <span class="rl-adv-section-title">Advanced filters</span>
+          <button class="rl-adv-clear" onclick="rlClearAdvFilters()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+            <span>Clear all</span>
+          </button>
+        </div>
+        <div class="rl-adv-conditions" id="rl-adv-conditions"></div>
+        <div class="rl-adv-footer">
+          <button class="rl-adv-add" onclick="rlAddCondition()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>New filter</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="rl-adv-actions">
+      <button class="modal-save" onclick="rlSaveAdvFilter()">Save</button>
+      <button class="modal-cancel" onclick="rlCloseAdvFilter()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Remove bucket confirm modal -->
+  <div class="modal-backdrop modal-fullscreen-mobile" id="rl-rmbk-modal" onclick="if(event.target===this) rlCloseRemoveBucketModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Remove bucket</div>
+        <button class="modal-close" onclick="rlCloseRemoveBucketModal()" aria-label="Close">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px;color:var(--tx);line-height:1.5;">
+          Are you sure you want to remove <strong id="rl-rmbk-name"></strong>?<br/>
+          <span style="color:var(--mu);">This action cannot be undone.</span>
+        </p>
+      </div>
+      <div class="modal-footer" style="justify-content:flex-end;gap:8px;">
+        <button class="modal-save rl-rmbk-yes" onclick="rlConfirmRemoveBucket()">Yes</button>
+        <button class="modal-cancel" onclick="rlCloseRemoveBucketModal()">No</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Assign users popup -->
   <div class="assign-popup" id="rl-user-popup" style="display:none;">
     <div class="assign-popup-title">Assign users</div>
@@ -371,7 +457,56 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
 <script src="shared/leads-comms.js"></script>
 <script src="shared/shell.js"></script>
 <script>
-BuySmartShell.init({ page: 'runlist', title: 'Runlist' });
+var _bkId = new URLSearchParams(location.search).get('bucket');
+var _bkLabel = 'Runlist';
+if(_bkId){
+  try {
+    var _all = JSON.parse(localStorage.getItem('buysmart:buckets') || '[]');
+    var _match = _all.find(function(b){ return b.id === _bkId; });
+    if(_match) _bkLabel = _match.name + ' — ' + _match.type;
+  } catch(e){}
+  document.title = _bkLabel + ' — BuySmart';
+  var _head = document.querySelector('.set-page-head');
+  if(_head){
+    var _badge = document.createElement('span');
+    _badge.className = 'rl-bucket-title';
+    _badge.textContent = _bkLabel;
+    _badge.style.cssText = 'display:inline-flex;align-items:center;height:32px;padding:0 12px;background:var(--sur2);border:0.5px solid var(--brd2);border-radius:8px;color:var(--tx);font-size:13px;font-weight:600;margin-right:4px;';
+    _head.insertBefore(_badge, _head.firstChild);
+  }
+  ['#rl-cal-btn','#rl-loc-btn','.set-page-head .tbtn-p.add-btn','#rl-user-btn','.set-page-head .tbtn.table-btn']
+    .forEach(function(sel){
+      var el = document.querySelector(sel);
+      if(el) el.style.display = 'none';
+    });
+  var _fbtn = document.getElementById('rl-filter-btn');
+  if(_fbtn){ _fbtn.setAttribute('onclick','rlToggleAdvFilter(event)'); }
+  var _kebab = document.getElementById('rl-kebab');
+  if(_kebab && _kebab.parentNode){
+    var _rm = document.createElement('button');
+    _rm.className = 'tbtn rl-remove-bucket';
+    _rm.setAttribute('data-tooltip', 'Remove bucket');
+    _rm.setAttribute('aria-label', 'Remove bucket');
+    _rm.setAttribute('onclick', 'rlRemoveCurrentBucket()');
+    _rm.innerHTML =
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<polyline points="3 6 5 6 21 6"/>' +
+        '<path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>' +
+        '<path d="M10 11v6M14 11v6"/>' +
+        '<path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>' +
+      '</svg>' +
+      '<span>Remove bucket</span>';
+    _kebab.parentNode.insertBefore(_rm, _kebab);
+  }
+  var _empty = document.getElementById('rl-empty');
+  if(_empty){
+    var _title = _empty.querySelector('.rl-empty-title');
+    var _sub   = _empty.querySelector('.rl-empty-sub');
+    if(_title) _title.textContent = 'Add a filter to view the runlist';
+    if(_sub)   _sub.innerHTML = 'Click the <strong>Filter</strong> button above, add at least one condition, then click <strong>Save</strong>.';
+  }
+}
+BuySmartShell.init({ page: 'runlist', title: _bkLabel });
 
 /* ── Runlist toolbar state + handlers ─────────────────────────────────── */
 const LOCATIONS = [
@@ -625,6 +760,22 @@ function rlRenderRow(r){
 function rlRender(){
   const emptyEl = document.getElementById('rl-empty');
   const tableEl = document.querySelector('.set-section .table-wrap');
+  if(_bkId){
+    if(!rlHasValidFilter()){
+      if(emptyEl) emptyEl.style.display = 'flex';
+      if(tableEl) tableEl.style.display = 'none';
+      return;
+    }
+    if(!rlCurrentLocation && Array.isArray(LOCATIONS) && LOCATIONS.length){
+      rlCurrentLocation = LOCATIONS[0].id;
+    }
+    if(emptyEl) emptyEl.style.display = 'none';
+    if(tableEl) tableEl.style.display = '';
+    rlBuildThead();
+    const filtered = rlFilteredData();
+    document.getElementById('rl-tbody').innerHTML = filtered.map(rlRenderRow).join('');
+    return;
+  }
   if(!rlCurrentLocation){
     if(emptyEl) emptyEl.style.display = 'flex';
     if(tableEl) tableEl.style.display = 'none';
@@ -1534,6 +1685,168 @@ function rlCloseFilterDrawer(){
 window.addEventListener('resize', function(){
   const wrap = document.getElementById('rl-filter-drawer');
   if(wrap && wrap.classList.contains('open')) rlPositionFilterDrawer();
+  const adv = document.getElementById('rl-adv-filter');
+  if(adv && adv.classList.contains('open')) rlPositionAdvFilter();
+});
+
+/* ── Advanced filter popup (bucket view) ─────────────────────────────── */
+const RL_ADV_OPS = ['is','is not','contains','does not contain','starts with','ends with','is empty','is not empty'];
+const RL_ADV_STORE_PREFIX = 'buysmart:runlist-filters:';
+let rlAdvConditions = [];
+
+function rlAdvStoreKey(){
+  return RL_ADV_STORE_PREFIX + (_bkId || '_base');
+}
+function rlLoadAdvConditions(){
+  try {
+    const raw = localStorage.getItem(rlAdvStoreKey());
+    const v = raw ? JSON.parse(raw) : [];
+    rlAdvConditions = Array.isArray(v) ? v : [];
+  } catch(e){ rlAdvConditions = []; }
+}
+function rlSaveAdvConditions(){
+  try { localStorage.setItem(rlAdvStoreKey(), JSON.stringify(rlAdvConditions)); } catch(e){}
+}
+function rlHasValidFilter(){
+  return rlAdvConditions.some(function(c){
+    if(!c || !c.col) return false;
+    if(c.op === 'is empty' || c.op === 'is not empty') return true;
+    return c.val != null && String(c.val).trim() !== '';
+  });
+}
+
+function rlAdvColumnOptions(selected){
+  const keys = Object.keys(RL_COLS);
+  const opts = ['<option value="">Select column</option>'].concat(keys.map(function(k){
+    const sel = k === selected ? ' selected' : '';
+    return '<option value="' + k + '"' + sel + '>' + RL_COLS[k].label + '</option>';
+  }));
+  return opts.join('');
+}
+function rlAdvOpOptions(selected){
+  return RL_ADV_OPS.map(function(op){
+    const sel = op === selected ? ' selected' : '';
+    return '<option value="' + op + '"' + sel + '>' + op + '</option>';
+  }).join('');
+}
+
+function rlRenderAdvConditions(){
+  const wrap = document.getElementById('rl-adv-conditions');
+  if(!wrap) return;
+  if(!rlAdvConditions.length){
+    wrap.innerHTML = '<div class="rl-adv-empty">No filters yet. Click <strong>+ New filter</strong> to add one.</div>';
+    return;
+  }
+  wrap.innerHTML = rlAdvConditions.map(function(c, i){
+    const valueDisabled = (c.op === 'is empty' || c.op === 'is not empty') ? ' disabled' : '';
+    const val = c.val == null ? '' : String(c.val).replace(/"/g,'&quot;');
+    return '<div class="rl-adv-row">' +
+      '<span class="rl-adv-where">Where</span>' +
+      '<select class="rl-adv-col" onchange="rlUpdateCondition(' + i + ',\'col\',this.value)">' + rlAdvColumnOptions(c.col) + '</select>' +
+      '<select class="rl-adv-op" onchange="rlUpdateCondition(' + i + ',\'op\',this.value)">' + rlAdvOpOptions(c.op) + '</select>' +
+      '<input class="rl-adv-val" type="text" placeholder="Value" value="' + val + '" oninput="rlUpdateCondition(' + i + ',\'val\',this.value)"' + valueDisabled + '/>' +
+      '<button class="rl-adv-rm" onclick="rlRemoveCondition(' + i + ')" aria-label="Remove">&#x2715;</button>' +
+    '</div>';
+  }).join('');
+}
+
+function rlAddCondition(){
+  rlAdvConditions.push({ col:'', op:'is', val:'' });
+  rlSaveAdvConditions();
+  rlRenderAdvConditions();
+}
+function rlRemoveCondition(i){
+  rlAdvConditions.splice(i, 1);
+  rlSaveAdvConditions();
+  rlRenderAdvConditions();
+}
+function rlUpdateCondition(i, key, value){
+  if(!rlAdvConditions[i]) return;
+  rlAdvConditions[i][key] = value;
+  rlSaveAdvConditions();
+  if(key === 'op'){ rlRenderAdvConditions(); }
+}
+function rlClearAdvFilters(){
+  rlAdvConditions = [];
+  rlSaveAdvConditions();
+  rlRenderAdvConditions();
+}
+
+function rlPositionAdvFilter(){
+  const wrap = document.getElementById('rl-adv-filter');
+  const btn = document.getElementById('rl-filter-btn');
+  if(!wrap || !btn) return;
+  const r = btn.getBoundingClientRect();
+  const width = wrap.offsetWidth || 640;
+  let top = r.bottom + 6;
+  let left = r.left;
+  if(left + width > window.innerWidth - 8) left = window.innerWidth - width - 8;
+  if(left < 8) left = 8;
+  wrap.style.top = top + 'px';
+  wrap.style.left = left + 'px';
+}
+
+function rlToggleAdvFilter(e){
+  if(e) e.stopPropagation();
+  const wrap = document.getElementById('rl-adv-filter');
+  if(!wrap) return;
+  if(wrap.classList.contains('open')){ rlCloseAdvFilter(); return; }
+  rlLoadAdvConditions();
+  if(!rlAdvConditions.length){ rlAdvConditions.push({ col:'', op:'is', val:'' }); }
+  rlRenderAdvConditions();
+  wrap.classList.add('open');
+  rlPositionAdvFilter();
+}
+function rlCloseAdvFilter(){
+  const wrap = document.getElementById('rl-adv-filter');
+  if(wrap) wrap.classList.remove('open');
+}
+
+function rlRemoveCurrentBucket(){
+  if(!_bkId) return;
+  var nameEl = document.getElementById('rl-rmbk-name');
+  if(nameEl) nameEl.textContent = _bkLabel;
+  document.getElementById('rl-rmbk-modal').classList.add('open');
+}
+
+function rlCloseRemoveBucketModal(){
+  document.getElementById('rl-rmbk-modal').classList.remove('open');
+}
+
+function rlConfirmRemoveBucket(){
+  if(!_bkId){ rlCloseRemoveBucketModal(); return; }
+  try {
+    var all = JSON.parse(localStorage.getItem('buysmart:buckets') || '[]');
+    var next = Array.isArray(all) ? all.filter(function(b){ return b.id !== _bkId; }) : [];
+    localStorage.setItem('buysmart:buckets', JSON.stringify(next));
+  } catch(e){}
+  try { localStorage.removeItem('buysmart:runlist-filters:' + _bkId); } catch(e){}
+  window.location.href = 'runlist.html';
+}
+
+function rlSaveAdvFilter(){
+  rlSaveAdvConditions();
+  rlRender();
+  rlCloseAdvFilter();
+  if(typeof window.showNavToast === 'function'){
+    var n = rlAdvConditions.length;
+    window.showNavToast('Filters applied', n + ' condition' + (n === 1 ? '' : 's') + ' saved.');
+  }
+}
+
+document.addEventListener('click', function(e){
+  const wrap = document.getElementById('rl-adv-filter');
+  const btn = document.getElementById('rl-filter-btn');
+  if(!wrap || !wrap.classList.contains('open')) return;
+  if(wrap.contains(e.target)) return;
+  if(btn && btn.contains(e.target)) return;
+  rlCloseAdvFilter();
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){
+    const wrap = document.getElementById('rl-adv-filter');
+    if(wrap && wrap.classList.contains('open')) rlCloseAdvFilter();
+  }
 });
 
 /* ── Assign users (multi-select popup + avatar stack) ────────────────── */
@@ -1638,6 +1951,7 @@ if(rlCurrentLocation){
 }
 
 // Paint the table body
+if(_bkId){ rlLoadAdvConditions(); }
 rlRender();
 
 /* Kebab menu */
