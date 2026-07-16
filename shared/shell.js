@@ -48,7 +48,9 @@
     '    <button class="notif-tab" data-tab="unread" onclick="setNotifTab(\'unread\')">Unread <span class="notif-tab-count" id="notif-count-unread">0</span></button>',
     '  </div>',
     '  <div class="notif-body" id="notif-body"></div>',
-    '  <div class="notif-footer"></div>',
+    '  <div class="notif-footer">',
+    '    <button class="notif-viewall" onclick="viewAllNotifications()">View All Notification</button>',
+    '  </div>',
     '</div>',
 
     '<div class="sidebar">',
@@ -403,6 +405,10 @@
 
   window.toggleNotifications = function(e){ if(e) e.stopPropagation(); var p = document.getElementById('notif-panel'); if(!p) return; if(p.classList.contains('open')) window.closeNotifications(); else window.openNotifications(); };
   window.openNotifications = function(){ var p = document.getElementById('notif-panel'), b = document.getElementById('header-bell'); if(!p||!b) return; if(p.parentElement !== document.body) document.body.appendChild(p); window.positionNotifications(); p.classList.add('open'); b.classList.add('active'); };
+  window.viewAllNotifications = function(){
+    try { window.closeNotifications && window.closeNotifications(); } catch(e){}
+    window.location.href = 'allnotifications.html';
+  };
   window.closeNotifications = function(){ var p = document.getElementById('notif-panel'), b = document.getElementById('header-bell'); if(p) p.classList.remove('open'); if(b) b.classList.remove('active'); };
   window.positionNotifications = function(){ var p = document.getElementById('notif-panel'), b = document.getElementById('header-bell'); if(!p||!b) return; var r = b.getBoundingClientRect(); var w = p.offsetWidth || 420; p.style.top = (r.bottom + 8) + 'px'; p.style.left = Math.max(8, r.right - w) + 'px'; };
   window.setNotifTab = function(t){ document.querySelectorAll('.notif-tab').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tab') === t); }); };
