@@ -12,6 +12,10 @@
 html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif;}
 .root.main-area{height:calc(100vh - 64px);min-height:0;overflow:hidden;display:flex;flex-direction:column;}
 @media (max-width:640px){ .root.main-area{height:auto;min-height:0;overflow:visible;} }
+.qa-status-row{display:flex;flex-wrap:wrap;gap:12px;padding:10px 12px;background:var(--sur2);border:0.5px solid var(--brd2);border-radius:8px;}
+.qa-chk{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer;padding:6px 10px;border-radius:6px;transition:background .15s;}
+.qa-chk:hover{background:var(--sur);}
+.qa-chk input{width:16px;height:16px;accent-color:var(--ac);margin:0;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -93,7 +97,7 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
             <div class="settings-card-sub">Manage Adj. Pricing Keyword</div>
           </div>
         </button>
-        <button class="settings-card" onclick="stOpen('Comparision Market Amount Setting','Manage Comparison Market Amount')">
+        <button class="settings-card" onclick="cmaOpen()">
           <span class="settings-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="20" x2="21" y2="20"/><rect x="5" y="12" width="3" height="8"/><rect x="10.5" y="7" width="3" height="13"/><rect x="16" y="4" width="3" height="16"/></svg></span>
           <div class="settings-card-text">
             <div class="settings-card-title">Comparision Market Amount Setting</div>
@@ -113,21 +117,14 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
             <div class="settings-card-sub">Manage Announcements</div>
           </div>
         </button>
-        <button class="settings-card" onclick="stOpen('SMS format','Manage your sms format')">
+        <button class="settings-card" onclick="stOpen('Tagging format','Manage Tagging format')">
           <span class="settings-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
           <div class="settings-card-text">
-            <div class="settings-card-title">SMS format</div>
-            <div class="settings-card-sub">Manage your sms format</div>
+            <div class="settings-card-title">Tagging format</div>
+            <div class="settings-card-sub">Manage Tagging format</div>
           </div>
         </button>
-        <button class="settings-card" onclick="stOpen('Notification Setting','Change Notification Setting')">
-          <span class="settings-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
-          <div class="settings-card-text">
-            <div class="settings-card-title">Notification Setting</div>
-            <div class="settings-card-sub">Change Notification Setting</div>
-          </div>
-        </button>
-        <button class="settings-card" onclick="stOpen('Queue Alerts Setting','Change Queue Alerts Setting')">
+        <button class="settings-card" onclick="qaOpen()">
           <span class="settings-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9 9a3 3 0 0 1 6 0c0 3-3 3-3 5"/><line x1="15" y1="16" x2="17" y2="19"/></svg></span>
           <div class="settings-card-text">
             <div class="settings-card-title">Queue Alerts Setting</div>
@@ -144,6 +141,80 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
       </div>
     </section>
 
+  </div>
+  <div class="modal-backdrop modal-fullscreen-mobile" id="qa-modal" onclick="if(event.target===this) qaClose()">
+    <div class="modal modal--wide">
+      <div class="modal-header">
+        <div class="modal-title">Queue Alerts Setting</div>
+        <button class="modal-close" onclick="qaClose()" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="us-add-section" style="grid-template-columns:1fr;">
+          <div class="us-add-section-head">
+            <h4 class="us-add-section-title">Notification Configuration</h4>
+          </div>
+          <div class="us-add-field" style="grid-column:auto;margin-top:0;">
+            <label>Selected Queue</label>
+            <select id="qa-queue" style="width:100%;">
+              <option value="Data Queue">Data Queue</option>
+              <option value="Import Queue">Import Queue</option>
+              <option value="Export Queue">Export Queue</option>
+              <option value="Sync Queue">Sync Queue</option>
+            </select>
+          </div>
+          <div class="us-add-field" style="grid-column:auto;margin-top:0;">
+            <label>Select Queue Status</label>
+            <div class="qa-status-row">
+              <label class="qa-chk"><input type="checkbox" id="qa-st-pending"/> <span>Pending</span></label>
+              <label class="qa-chk"><input type="checkbox" id="qa-st-running"/> <span>Running</span></label>
+              <label class="qa-chk"><input type="checkbox" id="qa-st-completed"/> <span>Completed</span></label>
+              <label class="qa-chk"><input type="checkbox" id="qa-st-fail"/> <span>Fail</span></label>
+            </div>
+          </div>
+          <div class="us-add-field" style="grid-column:auto;margin-top:0;">
+            <label>Alert Notification Format</label>
+            <textarea id="qa-format" rows="4" placeholder="Enter alert format" style="width:100%;padding:10px 12px;background:var(--sur2);border:0.5px solid var(--brd2);border-radius:8px;color:var(--tx);font-family:var(--font);font-size:13px;outline:none;resize:vertical;min-height:100px;"></textarea>
+          </div>
+        </div>
+        <div class="us-add-section" style="grid-template-columns:1fr;">
+          <div class="us-add-section-head">
+            <h4 class="us-add-section-title">Notification Recipients</h4>
+          </div>
+          <div class="us-add-field" style="grid-column:auto;margin-top:0;">
+            <label>Mobile No.</label>
+            <input type="text" id="qa-mobile" placeholder="Enter mobile number" style="width:100%;"/>
+          </div>
+          <div class="us-add-field" style="grid-column:auto;margin-top:0;">
+            <label>Email</label>
+            <input type="email" id="qa-email" placeholder="Enter email" style="width:100%;"/>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content:flex-end;">
+        <button class="modal-save"   onclick="qaSave()">Save</button>
+        <button class="modal-cancel" onclick="qaClose()">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop modal-fullscreen-mobile" id="cma-modal" onclick="if(event.target===this) cmaClose()">
+    <div class="modal modal--wide">
+      <div class="modal-header">
+        <div class="modal-title">Comparision Market Amount Setting</div>
+        <button class="modal-close" onclick="cmaClose()" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="us-add-section" style="grid-template-columns:1fr;">
+          <div class="us-add-field" style="grid-column:auto;margin-top:0;">
+            <label>Comparison Market Amount</label>
+            <input type="number" id="cma-amount" inputmode="decimal" step="any" placeholder="0" style="width:100%;"/>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content:flex-end;">
+        <button class="modal-save"   onclick="cmaSave()">Save</button>
+        <button class="modal-cancel" onclick="cmaClose()">Cancel</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -162,11 +233,9 @@ const ST_ROUTES = {
   'Item Formula': 'itemformula.html',
   'Vehicle Score': 'vehiclescore.html',
   'Adj. Pricing Keyword': 'adjpricingkeyword.html',
-  'Comparision Market Amount Setting': 'comparisionmarketamountsetting.html',
   'Announcements': 'announcements.html',
-  'SMS format': 'smsformat.html',
+  'Tagging format': 'smsformat.html',
   'Notification Setting': 'notificationsetting.html',
-  'Queue Alerts Setting': 'queuealertssetting.html',
   'Manage Google sheets': 'googlesheets.html'
 };
 
@@ -174,6 +243,83 @@ function stOpen(title, sub){
   const url = ST_ROUTES[title];
   if(url){ window.location.href = url; return; }
   window.showNavToast(title, sub + ' — coming soon.');
+}
+
+const CMA_STORE = 'buysmart:cma:amount';
+
+function cmaOpen(){
+  let saved = '';
+  try { saved = localStorage.getItem(CMA_STORE) || ''; } catch(e){}
+  document.getElementById('cma-amount').value = saved;
+  document.getElementById('cma-modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('cma-amount').focus(); }, 30);
+}
+
+function cmaClose(){
+  document.getElementById('cma-modal').classList.remove('open');
+}
+
+function cmaSave(){
+  const raw = document.getElementById('cma-amount').value;
+  const n = raw === '' ? 0 : parseFloat(raw);
+  if(isNaN(n)){
+    window.showNavToast('Invalid number', 'Enter a numeric amount.');
+    document.getElementById('cma-amount').focus();
+    return;
+  }
+  try { localStorage.setItem(CMA_STORE, String(n)); } catch(e){}
+  cmaClose();
+  window.showNavToast('Comparison Market Amount saved', 'Amount = ' + n + '.');
+}
+
+const QA_STORE = 'buysmart:queue-alerts';
+const QA_STATUSES = ['pending','running','completed','fail'];
+const QA_DEFAULT = {
+  queue: 'Data Queue',
+  statuses: { pending:false, running:false, completed:false, fail:false },
+  format: 'Queue Alert : @Sheetname Completed',
+  mobile: '8322245677',
+  email: ''
+};
+
+function qaLoad(){
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(QA_STORE) || 'null'); } catch(e){}
+  return Object.assign({}, QA_DEFAULT, saved || {}, {
+    statuses: Object.assign({}, QA_DEFAULT.statuses, (saved && saved.statuses) || {})
+  });
+}
+
+function qaOpen(){
+  const s = qaLoad();
+  document.getElementById('qa-queue').value = s.queue;
+  QA_STATUSES.forEach(function(k){
+    document.getElementById('qa-st-' + k).checked = !!s.statuses[k];
+  });
+  document.getElementById('qa-format').value = s.format;
+  document.getElementById('qa-mobile').value = s.mobile;
+  document.getElementById('qa-email').value  = s.email;
+  document.getElementById('qa-modal').classList.add('open');
+}
+
+function qaClose(){
+  document.getElementById('qa-modal').classList.remove('open');
+}
+
+function qaSave(){
+  const data = {
+    queue: document.getElementById('qa-queue').value,
+    statuses: QA_STATUSES.reduce(function(acc,k){
+      acc[k] = document.getElementById('qa-st-' + k).checked;
+      return acc;
+    }, {}),
+    format: document.getElementById('qa-format').value,
+    mobile: document.getElementById('qa-mobile').value.trim(),
+    email:  document.getElementById('qa-email').value.trim()
+  };
+  try { localStorage.setItem(QA_STORE, JSON.stringify(data)); } catch(e){}
+  qaClose();
+  window.showNavToast('Queue Alerts saved', 'Preferences updated.');
 }
 </script>
 
