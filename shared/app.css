@@ -1205,6 +1205,12 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
   .us-add-field input,.us-add-field select{font-size:16px;height:44px;}
 }
 
+/* Add New Bucket modal */
+.bk-radio-row{display:flex;flex-wrap:wrap;gap:24px;padding:4px 0;}
+.bk-radio{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer;}
+.bk-radio input{width:16px;height:16px;accent-color:var(--ac);margin:0;cursor:pointer;}
+.bk-req{color:var(--rd);margin-right:2px;}
+
 /* Permission tab (Runlist/Purchase/etc.) content */
 .us-perm-header{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 18px;border-bottom:0.5px solid var(--brd);margin-bottom:16px;}
 .us-perm-title{margin:0;font-size:16px;font-weight:600;color:var(--tx);}
