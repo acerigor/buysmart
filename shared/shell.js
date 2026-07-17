@@ -37,7 +37,10 @@
     '  <div class="notif-header">',
     '    <span class="notif-title">Notifications</span>',
     '    <div class="notif-header-actions">',
-    '      <button class="notif-markall" id="notif-markall" onclick="markAllNotificationsRead()">Mark all as read</button>',
+    '      <div class="notif-toggle-row">',
+    '        <span class="tog off" id="notif-unread-tog" onclick="toggleUnreadComments()"></span>',
+    '        <span class="notif-toggle-label">Unread Comments</span>',
+    '      </div>',
     '      <button class="notif-close" onclick="closeNotifications()" aria-label="Close">',
     '        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
     '      </button>',
@@ -405,6 +408,13 @@
 
   window.toggleNotifications = function(e){ if(e) e.stopPropagation(); var p = document.getElementById('notif-panel'); if(!p) return; if(p.classList.contains('open')) window.closeNotifications(); else window.openNotifications(); };
   window.openNotifications = function(){ var p = document.getElementById('notif-panel'), b = document.getElementById('header-bell'); if(!p||!b) return; if(p.parentElement !== document.body) document.body.appendChild(p); window.positionNotifications(); p.classList.add('open'); b.classList.add('active'); };
+  window.toggleUnreadComments = function(){
+    var tog = document.getElementById('notif-unread-tog');
+    if(!tog) return;
+    tog.classList.toggle('off');
+    var isOn = !tog.classList.contains('off');
+    if(typeof window.setNotifUnreadOnly === 'function') window.setNotifUnreadOnly(isOn);
+  };
   window.viewAllNotifications = function(){
     try { window.closeNotifications && window.closeNotifications(); } catch(e){}
     window.location.href = 'allnotifications.html';
