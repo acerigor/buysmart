@@ -1084,12 +1084,15 @@ function vdSeedComments(){
           leadName: c.author || 'You',
           leadAv:   c.av     || 'BS',
           leadColor:c.color  || '#22c88a',
-          title:'New comment · ' + vehLabel,
+          title: vehLabel,
           body: c.text,
           ts: c.ts,
           read: (now - c.ts) > (2 * VD_SEED_HR),
           vdSrno: parseInt(srno,10),
-          vdVin: vin
+          vdVin: vin,
+          vdYear:  row ? row.year  : null,
+          vdMake:  row ? row.make  : '',
+          vdModel: row ? row.model : ''
         });
       }
     });
@@ -1120,11 +1123,14 @@ function rlVdSendComment(){
       leadName:'You',
       leadAv:'BS',
       leadColor:'#22c88a',
-      title:'New comment · ' + vehLabel,
+      title: vehLabel,
       body: text,
       ts: ts,
       read:false,
-      vdSrno: srno, vdVin: vin
+      vdSrno: srno, vdVin: vin,
+      vdYear:  row ? row.year  : null,
+      vdMake:  row ? row.make  : '',
+      vdModel: row ? row.model : ''
     });
   }
 }
