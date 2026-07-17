@@ -28,7 +28,7 @@
 
 /* Mobile a11y — tighter head padding, larger title */
 @media (max-width:640px){
-  .set-page-head{padding:14px 16px;}
+  .set-page-head{padding:14px 16px;flex-wrap:wrap;row-gap:10px;}
   .set-page-title{font-size:16px;}
   .set-scroll{padding:18px 16px 60px;}
   .ur-back{min-height:44px;padding:10px 14px;}
