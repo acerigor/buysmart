@@ -14,6 +14,7 @@
   var _list = null;
   var _currentTab = 'all';
   var _search = '';
+  var _unreadOnly = false;
 
   /* ── persistence ─────────────────────────────────────────────────────── */
   function load(){
@@ -148,6 +149,10 @@
     if(tab==='unread') return unread();
     return byType(tab);
   }
+  function applyUnreadFilter(list){
+    if(!_unreadOnly) return list;
+    return list.filter(function(n){ return n.type === 'comment' && !n.read; });
+  }
   function applySearch(list){
     var q = String(_search||'').trim().toLowerCase();
     if(!q) return list;
@@ -161,7 +166,7 @@
   function render(tab){
     if(tab) _currentTab = tab;
     var body = document.getElementById('notif-body'); if(!body) return;
-    var list = applySearch(listFor(_currentTab));
+    var list = applySearch(applyUnreadFilter(listFor(_currentTab)));
     if(!list.length){
       body.innerHTML = '<div class="notif-empty"><div class="notif-empty-icon">🔔</div>' + (_search ? 'No matches' : 'You\'re all caught up') + '</div>';
     } else {
@@ -279,6 +284,10 @@
       _search = q || '';
       render(_currentTab);
     };
+    window.setNotifUnreadOnly = function(on){
+      _unreadOnly = !!on;
+      render(_currentTab);
+    };
     window.markAllNotificationsRead = function(){ markAllRead(); };
     window.ccNotifClickRow = clickRow;
   }
@@ -302,9 +311,38 @@
     _list = _list.filter(function(n){ return !(n && typeof n.id === 'string' && n.id.indexOf('ntf_seed_') === 0); });
     if(_list.length !== before) save();
   }
+  function migrateCommentFields(){
+    load();
+    var changed = false;
+    _list.forEach(function(n){
+      if(!n || n.type !== 'comment') return;
+      if(n.vdYear != null && n.vdMake && n.vdModel) return;
+      var t = String(n.title||'').trim();
+      if(!t) return;
+      var parts = t.split(/\s+/);
+      var y = parseInt(parts[0], 10);
+      if(!isNaN(y) && n.vdYear == null){ n.vdYear = y; changed = true; }
+      if(parts.length >= 2 && !n.vdMake){  n.vdMake  = parts[1]; changed = true; }
+      if(parts.length >= 3 && !n.vdModel){ n.vdModel = parts.slice(2).join(' '); changed = true; }
+    });
+    if(changed) save();
+  }
+  function migrateCommentTitles(){
+    load();
+    var changed = false;
+    _list.forEach(function(n){
+      if(n && n.type === 'comment' && typeof n.title === 'string' && n.title.indexOf('New comment · ') === 0){
+        n.title = n.title.slice('New comment · '.length);
+        changed = true;
+      }
+    });
+    if(changed) save();
+  }
   function init(){
     injectCss();
     purgeSeed();
+    migrateCommentTitles();
+    migrateCommentFields();
     extendTabs();
     installOverrides();
     render(_currentTab);
