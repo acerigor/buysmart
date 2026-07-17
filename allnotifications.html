@@ -21,6 +21,12 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
 .an-list .cc-ntf-row{padding:14px 18px;}
 .an-empty{max-width:960px;margin:24px auto;padding:32px 16px;text-align:center;color:var(--mu);font-size:13px;background:var(--sur);border:0.5px solid var(--brd2);border-radius:10px;}
 .an-empty-ic{font-size:24px;margin-bottom:6px;}
+@media (max-width:640px){
+  .an-period-toggle{flex-wrap:wrap;}
+  .an-period-btn{min-height:44px;padding:10px 14px;font-size:14px;}
+  .an-list-wrap{padding:0 12px;}
+  .assign-search{flex:1;min-width:180px;}
+}
 </style>
 </head>
 <body>
@@ -37,6 +43,9 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
       <button class="an-period-btn"        data-period="monthly" onclick="anSetPeriod('monthly')">Monthly</button>
       <button class="an-period-btn"        data-period="all"     onclick="anSetPeriod('all')">All</button>
     </div>
+    <button class="tbtn tbtn-icon" id="an-filter-btn" data-tooltip="Filter" aria-label="Filter" onclick="anOpenFilter(event)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+    </button>
     <div class="sp"></div>
     <div class="assign-search">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -44,6 +53,16 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
       </svg>
       <input id="an-search" type="text" placeholder="Search notifications…" oninput="anSetSearch(this.value)"/>
     </div>
+  </div>
+  <div class="fd-wrap" id="an-filter-drawer" onclick="event.stopPropagation()">
+    <div class="fd-left">
+      <div class="fd-list" id="an-fd-cats"></div>
+      <div class="fd-foot">
+        <span class="fd-clear" onclick="anClearAllFilters()">Clear all</span>
+        <span class="fd-foot-hint">Esc to close</span>
+      </div>
+    </div>
+    <div class="fd-right" id="an-fd-right"></div>
   </div>
   <div class="set-scroll">
     <section class="set-section" style="padding:0;">
@@ -63,6 +82,196 @@ function anSetSearch(q){
   anSearch = q || '';
   anRender();
 }
+const AN_FILTERS_STORE = 'buysmart:an-filters';
+const AN_FILTER_CATS = [
+  { key:'year',   label:'Year'        },
+  { key:'make',   label:'Make'        },
+  { key:'model',  label:'Model'       },
+  { key:'user',   label:'User'        },
+  { key:'read',   label:'Read Status' }
+];
+const AN_DEFAULT_FILTERS = { yearMin:'', yearMax:'', makes:[], models:[], users:[], readState:'all' };
+let anActiveCat = 'year';
+let anCatSearch = '';
+let anFilters = anLoadFilters();
+function anLoadFilters(){
+  try {
+    var v = JSON.parse(localStorage.getItem(AN_FILTERS_STORE) || 'null');
+    if(v && typeof v === 'object') return Object.assign({}, AN_DEFAULT_FILTERS, v, {
+      makes:  Array.isArray(v.makes)  ? v.makes  : [],
+      models: Array.isArray(v.models) ? v.models : [],
+      users:  Array.isArray(v.users)  ? v.users  : []
+    });
+  } catch(e){}
+  return Object.assign({}, AN_DEFAULT_FILTERS);
+}
+function anSaveFilters(){
+  try { localStorage.setItem(AN_FILTERS_STORE, JSON.stringify(anFilters)); } catch(e){}
+  anSyncFilterBadge();
+}
+function anHasActiveFilters(){
+  return !!(anFilters.yearMin || anFilters.yearMax ||
+    anFilters.makes.length || anFilters.models.length || anFilters.users.length ||
+    (anFilters.readState && anFilters.readState !== 'all'));
+}
+function anSyncFilterBadge(){
+  var btn = document.getElementById('an-filter-btn');
+  if(btn) btn.classList.toggle('active-filter', anHasActiveFilters());
+}
+function anDistinctFor(field){
+  var s = new Set();
+  var all = (typeof window.ccNotifAll === 'function') ? window.ccNotifAll() : [];
+  all.forEach(function(n){
+    if(n.type !== 'comment') return;
+    var v = (field === 'user') ? n.leadName : (field === 'make' ? n.vdMake : n.vdModel);
+    if(v) s.add(String(v));
+  });
+  return Array.from(s).sort();
+}
+function anCatCount(key){
+  if(key === 'year')  return (anFilters.yearMin || anFilters.yearMax) ? 1 : 0;
+  if(key === 'make')  return anFilters.makes.length;
+  if(key === 'model') return anFilters.models.length;
+  if(key === 'user')  return anFilters.users.length;
+  if(key === 'read')  return (anFilters.readState && anFilters.readState !== 'all') ? 1 : 0;
+  return 0;
+}
+function anRenderFilterLeft(){
+  var host = document.getElementById('an-fd-cats');
+  if(!host) return;
+  host.innerHTML = AN_FILTER_CATS.map(function(c){
+    var count = anCatCount(c.key);
+    var chip = count > 0 ? '<span class="fd-cat-count">' + count + '</span>' : '';
+    return '<div class="fd-cat' + (c.key === anActiveCat ? ' active' : '') + '" onclick="anSelectCat(\'' + c.key + '\')">' +
+      '<span class="fd-cat-label">' + anEsc(c.label) + '</span>' +
+      chip +
+      '<span class="fd-cat-chev">&#8250;</span>' +
+    '</div>';
+  }).join('');
+}
+function anSelectCat(key){
+  anActiveCat = key;
+  anCatSearch = '';
+  anRenderFilterLeft();
+  anRenderFilterRight();
+}
+function anRenderFilterRight(){
+  var right = document.getElementById('an-fd-right');
+  if(!right) return;
+  right.classList.add('show');
+  if(anActiveCat === 'year'){
+    right.innerHTML =
+      '<div class="fd-search-input" style="border-bottom:0.5px solid var(--brd);"><input type="text" placeholder="Year range" disabled style="cursor:default;background:transparent;border:none;padding:0;color:var(--mu);"/></div>' +
+      '<div class="fd-range">' +
+        '<input type="number" placeholder="Start" value="' + anEsc(anFilters.yearMin) + '" oninput="anSetYear(\'yearMin\', this.value)"/>' +
+        '<span class="fd-range-dash">&mdash;</span>' +
+        '<input type="number" placeholder="End" value="' + anEsc(anFilters.yearMax) + '" oninput="anSetYear(\'yearMax\', this.value)"/>' +
+      '</div>';
+    return;
+  }
+  if(anActiveCat === 'read'){
+    var opts = [ {v:'all',label:'All'}, {v:'unread',label:'Unread'}, {v:'read',label:'Read'} ];
+    right.innerHTML =
+      '<div class="fd-opts">' +
+        opts.map(function(o){
+          var chosen = anFilters.readState === o.v;
+          return '<div class="fd-opt' + (chosen ? ' chosen' : '') + '" onclick="anSetRead(\'' + o.v + '\')">' +
+            '<span class="fd-opt-label">' + anEsc(o.label) + '</span>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+    return;
+  }
+  // make / model / user — checkbox list with search
+  var vals = anDistinctFor(anActiveCat);
+  var q = anCatSearch.trim().toLowerCase();
+  if(q) vals = vals.filter(function(v){ return v.toLowerCase().indexOf(q) !== -1; });
+  var selKey = anActiveCat === 'make' ? 'makes' : (anActiveCat === 'model' ? 'models' : 'users');
+  var selected = anFilters[selKey];
+  right.innerHTML =
+    '<div class="fd-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>' +
+      '<input type="text" placeholder="Search" value="' + anEsc(anCatSearch) + '" oninput="anSetCatSearch(this.value)"/></div>' +
+    '<div class="fd-opts">' +
+      (vals.length ?
+        vals.map(function(v){
+          var chosen = selected.indexOf(v) !== -1;
+          return '<div class="fd-opt' + (chosen ? ' chosen' : '') + '" onclick="anToggleValue(\'' + selKey + '\', \'' + anEsc(v).replace(/'/g,"&#39;") + '\')">' +
+            '<span class="fd-opt-label">' + anEsc(v) + '</span>' +
+          '</div>';
+        }).join('')
+        : '<div class="fd-empty">No matches</div>') +
+    '</div>';
+}
+function anSetCatSearch(q){ anCatSearch = q || ''; anRenderFilterRight(); }
+function anSetYear(field, val){
+  anFilters[field] = String(val||'').replace(/[^0-9]/g,'').slice(0,4);
+  anSaveFilters();
+  anRenderFilterLeft();
+  anRender();
+}
+function anSetRead(v){
+  anFilters.readState = v;
+  anSaveFilters();
+  anRenderFilterLeft();
+  anRenderFilterRight();
+  anRender();
+}
+function anToggleValue(key, v){
+  var idx = anFilters[key].indexOf(v);
+  if(idx === -1) anFilters[key].push(v); else anFilters[key].splice(idx, 1);
+  anSaveFilters();
+  anRenderFilterLeft();
+  anRenderFilterRight();
+  anRender();
+}
+function anClearAllFilters(){
+  anFilters = Object.assign({}, AN_DEFAULT_FILTERS, { makes:[], models:[], users:[] });
+  anSaveFilters();
+  anRenderFilterLeft();
+  anRenderFilterRight();
+  anRender();
+}
+function anPositionFilterDrawer(){
+  var wrap = document.getElementById('an-filter-drawer');
+  var btn  = document.getElementById('an-filter-btn');
+  if(!wrap || !btn) return;
+  var r = btn.getBoundingClientRect();
+  var width = 480;
+  var top = r.bottom + 6;
+  var left = r.left;
+  if(left + width > window.innerWidth - 8) left = window.innerWidth - width - 8;
+  if(left < 8) left = 8;
+  wrap.style.top  = top + 'px';
+  wrap.style.left = left + 'px';
+}
+function anOpenFilter(e){
+  if(e) e.stopPropagation();
+  var wrap = document.getElementById('an-filter-drawer');
+  if(wrap.classList.contains('open')){ anCloseFilterDrawer(); return; }
+  anRenderFilterLeft();
+  anRenderFilterRight();
+  wrap.classList.add('open');
+  anPositionFilterDrawer();
+}
+function anCloseFilterDrawer(){
+  var wrap = document.getElementById('an-filter-drawer');
+  if(wrap) wrap.classList.remove('open');
+}
+document.addEventListener('click', function(e){
+  var wrap = document.getElementById('an-filter-drawer');
+  var btn  = document.getElementById('an-filter-btn');
+  if(!wrap || !wrap.classList.contains('open')) return;
+  if(wrap.contains(e.target) || (btn && btn.contains(e.target))) return;
+  anCloseFilterDrawer();
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') anCloseFilterDrawer();
+});
+window.addEventListener('resize', function(){
+  var wrap = document.getElementById('an-filter-drawer');
+  if(wrap && wrap.classList.contains('open')) anPositionFilterDrawer();
+});
+anSyncFilterBadge();
 function anSetPeriod(p){
   anPeriod = p;
   document.querySelectorAll('.an-period-btn').forEach(function(b){
@@ -119,8 +328,17 @@ function anRender(){
   var all = (typeof window.ccNotifAll === 'function') ? window.ccNotifAll() : [];
   var floor = anPeriodStart(anPeriod);
   var q = String(anSearch||'').trim().toLowerCase();
+  var yMin = anFilters.yearMin ? parseInt(anFilters.yearMin,10) : null;
+  var yMax = anFilters.yearMax ? parseInt(anFilters.yearMax,10) : null;
   var filtered = all.filter(function(n){
     if(n.ts < floor) return false;
+    if(yMin != null && (Number(n.vdYear)||0) < yMin) return false;
+    if(yMax != null && (Number(n.vdYear)||9999) > yMax) return false;
+    if(anFilters.makes.length  && anFilters.makes.indexOf(n.vdMake) === -1) return false;
+    if(anFilters.models.length && anFilters.models.indexOf(n.vdModel) === -1) return false;
+    if(anFilters.users.length  && anFilters.users.indexOf(n.leadName) === -1) return false;
+    if(anFilters.readState === 'unread' && n.read) return false;
+    if(anFilters.readState === 'read'   && !n.read) return false;
     if(!q) return true;
     return (String(n.title||'').toLowerCase().indexOf(q) !== -1) ||
            (String(n.body ||'').toLowerCase().indexOf(q) !== -1) ||
