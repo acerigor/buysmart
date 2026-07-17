@@ -229,6 +229,8 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
   padding:14px 18px;border-bottom:0.5px solid var(--brd);flex-shrink:0;}
 .notif-title{font-size:14px;font-weight:600;color:var(--tx);}
 .notif-header-actions{display:flex;align-items:center;gap:6px;}
+.notif-toggle-row{display:inline-flex;align-items:center;gap:8px;padding:4px 6px;}
+.notif-toggle-label{font-size:12px;font-weight:600;color:var(--mu);white-space:nowrap;}
 .notif-markall{background:transparent;border:none;color:var(--ac2);
   font-size:12px;font-weight:500;font-family:var(--font);cursor:pointer;
   padding:4px 8px;border-radius:6px;transition:background .12s;}
@@ -1277,4 +1279,33 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
   .vd-image-wrap{height:180px;}
   .vd-comment-input input{font-size:16px;}
   .vd-tab{min-height:40px;padding:0 14px;}
+}
+
+/* ── Fat-finger + responsive bumps (mobile) ─────────────────────────────
+   Applied under 640px so touch targets meet the 44×44 guideline and the
+   filter drawer / icon-only buttons / small toggles stop being mis-hits.
+   Kept in one block for easy review. */
+@media (max-width:640px){
+  /* Icon-only chip buttons + modal close chevron become square 44s. */
+  .tbtn-icon{width:44px;}
+  .modal-close{min-width:44px;min-height:44px;}
+
+  /* Toggle switches (bell "Unread Comments", Is Active, etc.). */
+  .tog{width:44px;height:24px;border-radius:12px;}
+  .tog::after{width:20px;height:20px;top:2px;left:2px;}
+  .tog:not(.off)::after{transform:translateX(20px);}
+  .notif-toggle-row{min-height:44px;padding:6px 8px;}
+
+  /* Filter drawer → full-width bottom sheet with stacked panes. */
+  .fd-wrap{left:0!important;right:0;width:auto;max-width:100vw;border-radius:12px 12px 0 0;top:auto!important;bottom:0;max-height:80vh;}
+  .fd-wrap.open{flex-direction:column;}
+  .fd-left{width:100%;border-right:none;border-bottom:0.5px solid var(--brd2);max-height:40vh;}
+  .fd-right{width:100%;max-height:60vh;position:static;top:auto;left:auto;height:auto;}
+  .fd-cat{min-height:44px;padding:12px 14px;font-size:14px;}
+  .fd-opt{min-height:44px;padding:12px 14px;font-size:14px;}
+  .fd-opt-label{font-size:14px;}
+  .fd-search input,.fd-search-input input{height:44px;font-size:16px;}
+  .fd-range{flex-direction:column;align-items:stretch;gap:8px;}
+  .fd-range input{height:44px;width:100%;font-size:16px;}
+  .fd-range-dash{display:none;}
 }
