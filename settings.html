@@ -16,6 +16,11 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
 .qa-chk{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer;padding:6px 10px;border-radius:6px;transition:background .15s;}
 .qa-chk:hover{background:var(--sur);}
 .qa-chk input{width:16px;height:16px;accent-color:var(--ac);margin:0;cursor:pointer;}
+.st-info-pop{position:fixed;display:none;z-index:120;background:var(--sur2);color:var(--ac2);border:0.5px solid var(--ac);border-radius:8px;padding:9px 12px;font-size:12px;font-weight:500;line-height:1.45;width:max-content;max-width:260px;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.45);font-family:var(--font);}
+.st-info-pop.open{display:block;}
+.st-info-head{display:none;}
+.st-info-body{padding:0;}
+@media (max-width:640px){ .st-info-pop{left:8px!important;right:8px;width:auto;max-width:none;} }
 </style>
 </head>
 <body>
@@ -218,6 +223,14 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
   </div>
 </div>
 
+<div class="st-info-pop" id="st-info-pop" onclick="event.stopPropagation()">
+  <div class="st-info-head">
+    <span class="st-info-title" id="st-info-title"></span>
+    <button class="st-info-close" onclick="stInfoClose()" aria-label="Close">&#x2715;</button>
+  </div>
+  <div class="st-info-body" id="st-info-body"></div>
+</div>
+
 <script src="shared/notifications.js"></script>
 <script src="shared/contact-panel.js"></script>
 <script src="shared/shell.js"></script>
@@ -321,6 +334,67 @@ function qaSave(){
   qaClose();
   window.showNavToast('Queue Alerts saved', 'Preferences updated.');
 }
+
+const ST_INFO = {};   // per-card copy TBD — placeholder used for now.
+const ST_INFO_PLACEHOLDER = 'Content coming soon';
+
+function stInfoOpen(anchor, key){
+  const pop = document.getElementById('st-info-pop');
+  const body = ST_INFO[key] || ST_INFO_PLACEHOLDER;
+  document.getElementById('st-info-title').textContent = key;
+  document.getElementById('st-info-body').textContent  = body;
+  pop.style.left = '-9999px';
+  pop.classList.add('open');
+  const r = anchor.getBoundingClientRect();
+  const w = pop.offsetWidth;
+  let top  = r.bottom + 6;
+  let left = r.right - w;
+  if(left < 8) left = 8;
+  if(left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
+  pop.style.top  = top + 'px';
+  pop.style.left = left + 'px';
+}
+function stInfoClose(){
+  document.getElementById('st-info-pop').classList.remove('open');
+}
+document.addEventListener('click', function(e){
+  const pop = document.getElementById('st-info-pop');
+  if(!pop || !pop.classList.contains('open')) return;
+  if(pop.contains(e.target)) return;
+  stInfoClose();
+});
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') stInfoClose(); });
+window.addEventListener('resize', function(){
+  const pop = document.getElementById('st-info-pop');
+  if(pop && pop.classList.contains('open')) stInfoClose();
+});
+
+(function stEnhanceCards(){
+  document.querySelectorAll('.settings-card').forEach(function(card){
+    if(card.querySelector('.settings-card-info')) return;
+    const titleEl = card.querySelector('.settings-card-title');
+    if(!titleEl) return;
+    const key = titleEl.textContent.trim();
+    const span = document.createElement('span');
+    span.className = 'settings-card-info';
+    span.setAttribute('role', 'button');
+    span.setAttribute('tabindex', '0');
+    span.setAttribute('aria-label', 'About ' + key);
+    span.textContent = 'i';
+    span.addEventListener('click', function(e){
+      e.stopPropagation();
+      stInfoOpen(span, key);
+    });
+    span.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        e.stopPropagation();
+        stInfoOpen(span, key);
+      }
+    });
+    card.appendChild(span);
+  });
+})();
 </script>
 
 </body>
