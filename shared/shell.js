@@ -3,6 +3,21 @@
    tags have loaded. Page keys: home, runlist, purchase, alert settings,
    purchase location, sheet queue, data queue, bid queue, add new bucket, settings. */
 (function(){
+  var THEME_STORE = 'buysmart:theme';
+  function loadTheme(){
+    try { var v = localStorage.getItem(THEME_STORE); return (v === 'light') ? 'light' : 'dark'; }
+    catch(e){ return 'dark'; }
+  }
+  function applyTheme(theme){
+    document.documentElement.setAttribute('data-theme', theme === 'light' ? 'light' : 'dark');
+  }
+  applyTheme(loadTheme());
+  window.toggleTheme = function(){
+    var next = (loadTheme() === 'light') ? 'dark' : 'light';
+    try { localStorage.setItem(THEME_STORE, next); } catch(e){}
+    applyTheme(next);
+  };
+
   var NAV_ROUTES = {
     'Dashboard': 'index.html',
     'Runlist': 'runlist.html',
@@ -26,6 +41,10 @@
     '    </div>',
     '  </div>',
     '  <div class="top-header-right">',
+    '    <button class="header-theme" id="header-theme" onclick="toggleTheme()" aria-label="Toggle theme" title="Toggle theme">',
+    '      <svg class="th-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>',
+    '      <svg class="th-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+    '    </button>',
     '    <button class="header-bell" id="header-bell" data-label="Notifications" onclick="toggleNotifications(event)" aria-label="Notifications">',
     '      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
     '      <span class="header-bell-dot" id="header-bell-dot"></span>',
@@ -489,6 +508,9 @@
       // Set page title.
       var titleEl = document.querySelector('.set-page-title');
       if(titleEl && title) titleEl.textContent = title;
+
+      // Re-apply theme (defensive after markup injection).
+      applyTheme(loadTheme());
 
       // Populate notifications now that markup is in the DOM.
       if(typeof window.renderNotifications === 'function') window.renderNotifications();
