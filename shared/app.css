@@ -23,6 +23,24 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
   --teal:#2dd4bf;--purple:#c4b5fd;
   --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
 }
+:root[data-theme="light"]{
+  --bg:#f4f6fb; --sur:#ffffff; --sur2:#f3f5fa;
+  --brd:rgba(15,17,23,.08); --brd2:rgba(15,17,23,.14);
+  --tx:#1a1d29; --mu:#5b6273;
+  --ac:#3f6be6; --ac2:#5482f0;
+  --gr:#12a56c; --am:#c67c14; --rd:#c93a3a;
+  --teal:#0f9ea0; --purple:#7c5ff2;
+}
+html[data-theme]{background:var(--bg);}
+html[data-theme] body{background:var(--bg);}
+
+.header-theme{width:32px;height:32px;border-radius:8px;background:transparent;border:0.5px solid var(--brd2);color:var(--mu);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:color .12s,border-color .12s,background .12s;}
+.header-theme:hover{color:var(--ac2);border-color:var(--ac);background:rgba(79,124,255,.10);}
+.header-theme .th-sun{display:none;}
+.header-theme .th-moon{display:inline-flex;}
+:root[data-theme="light"] .header-theme .th-sun{display:inline-flex;}
+:root[data-theme="light"] .header-theme .th-moon{display:none;}
+@media (max-width:640px){ .header-theme{width:44px;height:44px;} }
 .root{background:var(--bg);font-family:var(--font);color:var(--tx);min-height:93vh;display:flex;flex-direction:column;position:relative;}
 
 /* ── Top header (full width, fixed 64px) ───────────────────────────────── */
@@ -30,7 +48,7 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
   background:var(--bg);border-bottom:0.5px solid var(--brd);
   display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:60;}
 .top-header .logo{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;letter-spacing:-.3px;
-  color:#fff;display:flex;align-items:center;gap:10px;}
+  color:var(--tx);display:flex;align-items:center;gap:10px;}
 .top-header .logo-mark{width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .top-header .logo-mark img{width:32px;height:32px;border-radius:8px;object-fit:cover;}
 .th-left{display:flex;align-items:center;gap:10px;}
