@@ -335,7 +335,19 @@ function qaSave(){
   window.showNavToast('Queue Alerts saved', 'Preferences updated.');
 }
 
-const ST_INFO = {};   // per-card copy TBD — placeholder used for now.
+const ST_INFO = {
+  'User': 'Create, edit, activate/deactivate, and search accounts, and to control role, credentials, contact / location, fine-grained module + column permissions (Runlist, Purchase, Dashboard Widgets, Pages), auction assignment, and email/SMS notification preferences all in one modal.',
+  'User Roles': 'Create, rename, search, and delete role templates, and to define the default permission tree each role grants including Runlist / Purchase / Dashboard Widgets / Page access, plus Runlist and Purchase column-level visibility. Assigning a role to a person happens on the user page; setting what that role means happens here.',
+  'User Auction Assignment': 'Admins use userauctionassignment.html to see every auction, control its Sheet Type inline, and assign or unassign BuySmart teammates against it via a searchable people popup with bulk-select and search over the whole list. Creating a brand-new auction assignment and editing ChannelId are placeholders for future work.',
+  'Auction Credentials': 'Register, edit, delete, and share auction-provider login accounts capturing UserName + Password for scraping and an accompanying Email account (username/password/host/port/SSL) for mailbox-based intake, then assign teammates who can act under those credentials via a searchable people popup.',
+  'Auction Seller': 'Maintain the master list of seller names, add new sellers, rename existing ones, and flag each as Active or Inactive so filters and reports across BuySmart have a clean, curated source of truth (with a stub Import path for future bulk-loads).',
+  'Item Formula': 'Its recon-cost formula one number per line item (upholstery, paint, body, tires, windshield, rims, misc) persisted so the runlist\'s pricing calculations stay consistent across sessions.',
+  'Adj. Pricing Keyword': 'Build a prioritized keyword-driven pricing-adjustment engine each rule watches specific vehicle fields (AutoCheck, CarFax, Description, Title, VIN, Year/Make/Model) for keyword matches and, when triggered, bumps wholesale/retail suggested prices by a configurable percentage. Rules are drag-reorderable, per-rule collapsible, save/cancel/clear-all as a single set, and can hold multiple AND-combined conditions each.',
+  'Comparision Market Amount Setting': 'Set one baseline "Comparison Market Amount" number that the runlist uses when comparing against MMR / VRank persisted so pricing comparisons stay consistent across sessions.',
+  'Announcements': 'Maintain a list of flash messages and select exactly one active message at a time (enforced by a single-active invariant). The active message is what the app broadcasts everywhere most visibly, it\'s the text the SMS Template editor\'s Broadcast icon inserts into a template.',
+  'Tagging format': 'Create, edit, and delete named SMS templates writing the body in a WYSIWYG editor that supports bold, dynamic column/user tokens, hyperlinks, and one-click insertion of the currently-active announcement with a live iPhone-style preview on the right and one active template selected at a time via a YES/OFF toggle.',
+  'Queue Alerts Setting': 'Choose a queue (Data / Import / Export / Sync), pick which statuses trigger a notification (Pending / Running / Completed / Fail), write the alert body with an @Sheetname-style token, and set the mobile number and email address that receive those alerts all persisted so the ops team stays informed when a queue changes state.'
+};
 const ST_INFO_PLACEHOLDER = 'Content coming soon';
 
 function stInfoOpen(anchor, key){
