@@ -139,7 +139,7 @@ html[data-theme] body{background:var(--bg);}
 .nav-toast-icon{width:32px;height:32px;border-radius:8px;background:rgba(79,124,255,.15);
   color:var(--ac2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .nav-toast-text{flex:1;font-size:13px;color:var(--tx);line-height:1.4;}
-.nav-toast-text strong{font-weight:600;color:#fff;display:block;font-size:13.5px;margin-bottom:2px;}
+.nav-toast-text strong{font-weight:600;color:var(--tx);display:block;font-size:13.5px;margin-bottom:2px;}
 .nav-toast-text span{color:var(--mu);font-size:12px;}
 .nav-toast-close{background:transparent;border:none;color:var(--mu);font-size:14px;
   cursor:pointer;padding:2px 6px;opacity:.7;transition:opacity .12s;flex-shrink:0;}
@@ -209,9 +209,9 @@ html[data-theme] body{background:var(--bg);}
 
 /* ── Product switcher (clickable logo → CoreConnect / Reputation) ──────── */
 .logo{cursor:pointer;position:relative;user-select:none;}
-.logo:hover .logo-chev{color:#fff;}
-.logo-chev{width:11px;height:11px;flex:none;color:rgba(255,255,255,.6);transition:transform .15s,color .15s;margin-left:1px;}
-.logo.ps-open .logo-chev{transform:rotate(180deg);color:#fff;}
+.logo:hover .logo-chev{color:var(--tx);}
+.logo-chev{width:11px;height:11px;flex:none;color:var(--mu);transition:transform .15s,color .15s;margin-left:1px;}
+.logo.ps-open .logo-chev{transform:rotate(180deg);color:var(--tx);}
 .product-switcher{display:none;position:fixed;top:0;left:0;min-width:200px;
   background:#181c27;border:0.5px solid rgba(255,255,255,.13);border-radius:10px;
   box-shadow:0 14px 36px rgba(0,0,0,.55);z-index:10000;padding:6px;}
@@ -997,7 +997,7 @@ html[data-theme] body{background:var(--bg);}
 /* Product switcher — clickable logo → dropdown (BuySmart / Reputation) */
 .logo{cursor:pointer;position:relative;user-select:none;}
 .logo:hover .logo-chev{color:var(--tx);}
-.logo-chev{width:11px;height:11px;flex:none;color:rgba(255,255,255,.6);transition:transform .15s,color .15s;margin-left:1px;}
+.logo-chev{width:11px;height:11px;flex:none;color:var(--mu);transition:transform .15s,color .15s;margin-left:1px;}
 .logo.ps-open .logo-chev{transform:rotate(180deg);color:var(--tx);}
 .product-switcher{display:none;position:fixed;top:0;left:0;min-width:200px;background:var(--sur);border:0.5px solid var(--brd2);border-radius:10px;box-shadow:0 14px 36px rgba(0,0,0,.55);z-index:10000;padding:6px;}
 .product-switcher.ps-open{display:block;}
