@@ -305,11 +305,63 @@
   window.ccNotifSyncBellDot = syncBellDot;
   window.ccNotifClickRow = clickRow;
 
-  function purgeSeed(){
+  var SEED_FLAG = 'buysmart:notif:seeded:v3-comments';
+  var VD_SEED_MIN = 60*1000, VD_SEED_HR = 3600*1000;
+  var NOTIF_VD_TEAM = [
+    { name:'Sarah Kim',     av:'SK', color:'#534AB7' },
+    { name:'James Donovan', av:'JD', color:'#22C88A' },
+    { name:'Maria Lopez',   av:'ML', color:'#B73D5B' },
+    { name:'Andre Coleman', av:'AC', color:'#0F6E56' },
+    { name:'Priya Shah',    av:'PS', color:'#3D81B7' },
+    { name:'Kevin Ng',      av:'KN', color:'#B77B3D' }
+  ];
+  var NOTIF_VD_SEEDS = [
+    { srno:1, year:2019, make:'HYUNDAI', model:'TUCSON', vin:'KM8J33AL8KU938601', authorIdx:0, offsetMs:  4*VD_SEED_MIN, text:'Rear bumper has a small crack, but easy fix.' },
+    { srno:1, year:2019, make:'HYUNDAI', model:'TUCSON', vin:'KM8J33AL8KU938601', authorIdx:1, offsetMs: 22*VD_SEED_MIN, text:'MMR looks strong — worth pushing to floor + 500.' },
+    { srno:1, year:2019, make:'HYUNDAI', model:'TUCSON', vin:'KM8J33AL8KU938601', authorIdx:2, offsetMs:  3*VD_SEED_HR,  text:'Interior in great shape for the mileage.' },
+    { srno:2, year:2016, make:'LINCOLN', model:'MKX',    vin:'2LMPJ8LR1GBL35202', authorIdx:3, offsetMs: 15*VD_SEED_MIN, text:'Prior lease — expect wear on driver seat.' },
+    { srno:2, year:2016, make:'LINCOLN', model:'MKX',    vin:'2LMPJ8LR1GBL35202', authorIdx:4, offsetMs:  2*VD_SEED_HR,  text:'Carfax clean, no accidents reported.' },
+    { srno:3, year:2019, make:'RAM',     model:'1500',   vin:'1C6RR6LT0KS529203', authorIdx:5, offsetMs: 40*VD_SEED_MIN, text:'Structural alteration flagged — needs inspection.' },
+    { srno:3, year:2019, make:'RAM',     model:'1500',   vin:'1C6RR6LT0KS529203', authorIdx:0, offsetMs:  5*VD_SEED_HR,  text:'Skipping. Too much risk on the frame.' },
+    { srno:4, year:2018, make:'HONDA',   model:'Civic',  vin:'JHMFC1F73JX016304', authorIdx:2, offsetMs: 55*VD_SEED_MIN, text:'Hail damage + prior lease + title absent. Pass.' },
+    { srno:5, year:2020, make:'TOYOTA',  model:'RAV4',   vin:'2T3P1RFV0LC072105', authorIdx:3, offsetMs: 30*VD_SEED_MIN, text:'Priced right for the trim. Bidding.' },
+    { srno:5, year:2020, make:'TOYOTA',  model:'RAV4',   vin:'2T3P1RFV0LC072105', authorIdx:1, offsetMs:  4*VD_SEED_HR,  text:'Full service records on file — nice find.' }
+  ];
+  function seedIfEmpty(){
     load();
+    // Legacy purge — strip old CoreConnect seed rows AND the v2 SMS/email mix.
     var before = _list.length;
-    _list = _list.filter(function(n){ return !(n && typeof n.id === 'string' && n.id.indexOf('ntf_seed_') === 0); });
+    _list = _list.filter(function(n){
+      if(!n || typeof n.id !== 'string') return true;
+      if(n.id.indexOf('ntf_seed_') === 0) return false;
+      if(n.id.indexOf('ntf_v2_')   === 0) return false;
+      return true;
+    });
     if(_list.length !== before) save();
+    // Drop the stale v2 flag so it doesn't linger.
+    try { localStorage.removeItem('buysmart:notif:seeded:v2'); } catch(e){}
+    // Seed v3 comments once per install.
+    try { if(localStorage.getItem(SEED_FLAG) === '1') return; } catch(e){}
+    var now = Date.now();
+    NOTIF_VD_SEEDS.forEach(function(s){
+      var p = NOTIF_VD_TEAM[s.authorIdx % NOTIF_VD_TEAM.length];
+      var ts = now - s.offsetMs;
+      _list.unshift({
+        id: 'ntf_v3_' + Math.floor(Math.random()*1e9),
+        type: 'comment',
+        leadNo: s.srno,
+        leadName: p.name, leadAv: p.av, leadColor: p.color,
+        title: s.year + ' ' + s.make + ' ' + s.model,
+        body:  s.text,
+        ts:    ts,
+        read:  (now - ts) > (2 * VD_SEED_HR),
+        vdSrno: s.srno, vdVin: s.vin,
+        vdYear: s.year, vdMake: s.make, vdModel: s.model
+      });
+    });
+    _list.sort(function(a,b){ return b.ts - a.ts; });
+    save();
+    try { localStorage.setItem(SEED_FLAG, '1'); } catch(e){}
   }
   function migrateCommentFields(){
     load();
@@ -340,7 +392,7 @@
   }
   function init(){
     injectCss();
-    purgeSeed();
+    seedIfEmpty();
     migrateCommentTitles();
     migrateCommentFields();
     extendTabs();
