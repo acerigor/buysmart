@@ -75,11 +75,11 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
             <div class="settings-card-sub">Manage Auction Seller</div>
           </div>
         </button>
-        <button class="settings-card" onclick="stOpen('Item Formula','Manage Item Formula')">
+        <button class="settings-card" onclick="stOpen('Damage Values','Input Values for Repair Cost')">
           <span class="settings-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="12" y1="10" x2="14" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="12" y1="14" x2="14" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="12" y1="18" x2="16" y2="18"/></svg></span>
           <div class="settings-card-text">
-            <div class="settings-card-title">Item Formula</div>
-            <div class="settings-card-sub">Manage Item Formula</div>
+            <div class="settings-card-title">Damage Values</div>
+            <div class="settings-card-sub">Input Values for Repair Cost</div>
           </div>
         </button>
       </div>
@@ -95,11 +95,11 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
             <div class="settings-card-sub">Manage Vehicle Score</div>
           </div>
         </button>
-        <button class="settings-card" onclick="stOpen('Adj. Pricing Keyword','Manage Adj. Pricing Keyword')">
+        <button class="settings-card" onclick="stOpen('Adjustment Value Rules','Set Rules for Valuation Adjustments')">
           <span class="settings-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 0 0 20V2z" fill="currentColor" stroke="none"/></svg></span>
           <div class="settings-card-text">
-            <div class="settings-card-title">Adj. Pricing Keyword</div>
-            <div class="settings-card-sub">Manage Adj. Pricing Keyword</div>
+            <div class="settings-card-title">Adjustment Value Rules</div>
+            <div class="settings-card-sub">Set Rules for Valuation Adjustments</div>
           </div>
         </button>
         <button class="settings-card" onclick="cmaOpen()">
@@ -243,9 +243,9 @@ const ST_ROUTES = {
   'User Auction Assignment': 'userauctionassignment.html',
   'Auction Credentials': 'auctioncredentials.html',
   'Auction Seller': 'auctionseller.html',
-  'Item Formula': 'itemformula.html',
+  'Damage Values': 'itemformula.html',
   'Vehicle Score': 'vehiclescore.html',
-  'Adj. Pricing Keyword': 'adjpricingkeyword.html',
+  'Adjustment Value Rules': 'adjpricingkeyword.html',
   'Announcements': 'announcements.html',
   'Tagging format': 'smsformat.html',
   'Notification Setting': 'notificationsetting.html',
@@ -341,8 +341,8 @@ const ST_INFO = {
   'User Auction Assignment': 'Assign specific users to specific auctions so they can only buy, bid, or manage vehicles for the auctions they\'re assigned to.',
   'Auction Credentials': 'Store and manage login credentials (usernames/passwords/API keys) used to connect to each auction platform.',
   'Auction Seller': 'Manage the list of sellers associated with auctions, including seller details used for tracking vehicle sources.',
-  'Item Formula': 'Its recon-cost formula one number per line item (upholstery, paint, body, tires, windshield, rims, misc) persisted so the runlist\'s pricing calculations stay consistent across sessions.',
-  'Adj. Pricing Keyword': 'Build a prioritized keyword-driven pricing-adjustment engine each rule watches specific vehicle fields (AutoCheck, CarFax, Description, Title, VIN, Year/Make/Model) for keyword matches and, when triggered, bumps wholesale/retail suggested prices by a configurable percentage. Rules are drag-reorderable, per-rule collapsible, save/cancel/clear-all as a single set, and can hold multiple AND-combined conditions each.',
+  'Damage Values': 'Configure calculation formulas used to determine item-level values (e.g. cost, fees, or scoring components) during the buying process.',
+  'Adjustment Value Rules': 'Manage keywords that trigger automatic price adjustments (e.g. flagging damage or condition terms that affect valuation).',
   'Comparision Market Amount Setting': 'Set one baseline "Comparison Market Amount" number that the runlist uses when comparing against MMR / VRank persisted so pricing comparisons stay consistent across sessions.',
   'Announcements': 'Create and manage short pop-up/banner notifications shown to users within the application.',
   'Tagging format': 'Customize the template/format used for outgoing SMS text messages sent by the system.',
