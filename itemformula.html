@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Item Formula — BuySmart</title>
+<title>Damage Values — BuySmart</title>
 <link rel="stylesheet" href="shared/app.css">
 <link rel="stylesheet" href="shared/settings.css">
 <link rel="stylesheet" href="shared/contact-panel.css">
@@ -52,7 +52,7 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
 <script src="shared/notifications.js"></script>
 <script src="shared/contact-panel.js"></script>
 <script src="shared/shell.js"></script>
-<script>BuySmartShell.init({ page: 'settings', title: 'Item Formula' });
+<script>BuySmartShell.init({ page: 'settings', title: 'Damage Values' });
 
 const IF_KEYS = ['upholstery','paint','body','tires','ws','rims','misc'];
 const IF_STORE = 'buysmart:itemformula';
@@ -87,7 +87,7 @@ function ifSave(){
   const v = ifCollect();
   if(!v) return;
   try { localStorage.setItem(IF_STORE, JSON.stringify(v)); } catch(e){}
-  window.showNavToast('Item Formula saved', 'Values updated.');
+  window.showNavToast('Damage Values saved', 'Values updated.');
 }
 
 function ifCancel(){
