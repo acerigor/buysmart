@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Adj. Pricing Keyword — BuySmart</title>
+<title>Adjustment Value Rules — BuySmart</title>
 <link rel="stylesheet" href="shared/app.css">
 <link rel="stylesheet" href="shared/settings.css">
 <link rel="stylesheet" href="shared/contact-panel.css">
@@ -82,7 +82,7 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
       </svg>
-      <span>Adjustment Pricing Keyword</span>
+      <span>Add New Rules</span>
     </button>
     <div class="kebab-outer" id="apk-kebab">
       <button class="tbtn kebab-btn" onclick="apkToggleKebab(event)" aria-label="More">
@@ -117,7 +117,7 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
 <script src="shared/notifications.js"></script>
 <script src="shared/contact-panel.js"></script>
 <script src="shared/shell.js"></script>
-<script>BuySmartShell.init({ page: 'settings', title: 'Adj. Pricing Keyword' });
+<script>BuySmartShell.init({ page: 'settings', title: 'Adjustment Value Rules' });
 
 const APK_FIELD_OPTIONS = ['AutoCheck','CarFax','Description','Title','VIN','Year','Make','Model'];
 const APK_OP_OPTIONS    = ['Contains','Equals','Starts With','Ends With','Not Contains'];
@@ -338,7 +338,7 @@ function apkClearAll(){
 
 function apkSaveAll(){
   try { localStorage.setItem(APK_STORE, JSON.stringify(APK_RULES)); } catch(e){}
-  window.showNavToast('Rules saved', 'Adj. Pricing Keyword rules updated.');
+  window.showNavToast('Rules saved', 'Adjustment Value Rules rules updated.');
 }
 
 function apkCancelAll(){
