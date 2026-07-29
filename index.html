@@ -80,21 +80,49 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
 .widget--graph .w-body{position:relative;padding:12px 16px 16px;}
 .dash-chart{width:100%;height:220px;display:block;}
 .dash-chart-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mu);font-family:var(--font);pointer-events:none;}
-.dwp{position:fixed;background:var(--sur);border:0.5px solid var(--brd2);border-radius:10px;overflow:hidden;min-width:240px;max-height:70vh;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.35);top:0;left:0;display:none;flex-direction:column;}
-.dwp.show{display:flex;}
-.dwp-section{font-size:10.5px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:.7px;padding:12px 14px 6px;border-bottom:0.5px solid var(--brd);flex-shrink:0;}
-.dwp-list{flex:1;overflow-y:auto;}
-.dwp-item{display:flex;align-items:center;gap:10px;padding:9px 13px;cursor:pointer;border-bottom:0.5px solid var(--brd);transition:background .1s;background:transparent;border-left:none;border-right:none;border-top:none;width:100%;font-family:var(--font);text-align:left;}
-.dwp-item:last-child{border-bottom:none;}
-.dwp-item:hover{background:rgba(255,255,255,.04);}
-.dwp-check{width:16px;height:16px;border-radius:4px;flex-shrink:0;border:0.5px solid var(--brd2);background:transparent;display:flex;align-items:center;justify-content:center;color:transparent;transition:all .12s;}
-.dwp-check svg{width:11px;height:11px;}
-.dwp-item[aria-checked="true"] .dwp-check{background:var(--ac);border-color:var(--ac);color:#fff;}
-.dwp-label{flex:1;font-size:12.5px;font-weight:500;color:var(--tx);}
-.dwp-item[aria-checked="false"] .dwp-label{color:var(--mu);}
-.dwp-footer{display:flex;align-items:center;justify-content:flex-end;padding:8px;border-top:0.5px solid var(--brd);flex-shrink:0;background:var(--sur2);}
-.dwp-reset{background:transparent;border:none;color:var(--ac2);font-size:12px;font-weight:500;font-family:var(--font);cursor:pointer;padding:6px 10px;border-radius:6px;transition:background .12s;}
+.dwp-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9998;opacity:0;pointer-events:none;transition:opacity .18s ease-out;}
+.dwp-backdrop.show{opacity:1;pointer-events:auto;}
+.dwp{position:fixed;top:0;right:0;bottom:0;width:360px;max-width:100vw;height:100dvh;background:var(--sur);border-left:0.5px solid var(--brd2);z-index:9999;box-shadow:-8px 0 24px rgba(0,0,0,.35);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .24s ease-out;left:auto;}
+.dwp.show{transform:translateX(0);}
+.dwp-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:0.5px solid var(--brd);flex-shrink:0;}
+.dwp-head h3{margin:0;font-size:16px;font-weight:600;color:var(--tx);font-family:var(--font);}
+.dwp-close{width:32px;height:32px;border-radius:8px;background:transparent;border:0.5px solid var(--brd2);color:var(--mu);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:14px;transition:color .12s,border-color .12s,background .12s;}
+.dwp-close:hover{color:var(--tx);border-color:var(--ac);background:var(--sur2);}
+.dwp-section{font-size:10.5px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.7px;padding:14px 16px 8px;flex-shrink:0;}
+.dwp-list{flex:1;overflow-y:auto;padding:0 16px 12px;display:flex;flex-direction:column;gap:12px;}
+.dwp-card{background:var(--sur);border:0.5px solid var(--brd2);border-radius:12px;overflow:hidden;transition:border-color .15s,opacity .15s;flex-shrink:0;}
+.dwp-card:hover{border-color:var(--ac);}
+.dwp-card.dwp-drag-over{border-color:var(--ac);box-shadow:0 0 0 2px rgba(79,124,255,.18);}
+.dwp-card.off{opacity:.55;}
+.dwp-card-head{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:0.5px solid var(--brd);}
+.dwp-drag{width:14px;height:16px;color:var(--mu);cursor:grab;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;}
+.dwp-drag:active{cursor:grabbing;}
+.dwp-drag svg{width:12px;height:14px;}
+.dwp-card-name{flex:1;font-size:13px;font-weight:600;color:var(--tx);font-family:var(--font);}
+.dwp-card-toggle{width:32px;height:32px;border-radius:8px;background:var(--ac);border:none;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .12s;}
+.dwp-card-toggle:hover{background:var(--ac2);}
+.dwp-card.off .dwp-card-toggle{background:var(--sur2);color:var(--mu);border:0.5px solid var(--brd2);}
+.dwp-card.off .dwp-card-toggle:hover{color:var(--ac2);border-color:var(--ac);}
+.dwp-card-toggle svg{width:14px;height:14px;}
+.dwp-card-preview{padding:12px;background:var(--sur2);}
+.dwp-preview-kpi{display:flex;align-items:center;gap:12px;padding:12px;background:var(--sur);border:0.5px solid var(--brd);border-radius:8px;}
+.dwp-preview-kpi-icon{width:36px;height:36px;border-radius:8px;background:rgba(79,124,255,.14);color:var(--ac2);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+.dwp-preview-kpi-icon svg{width:18px;height:18px;}
+.dwp-preview-kpi-body{flex:1;min-width:0;}
+.dwp-preview-kpi-value{font-size:18px;font-weight:700;color:var(--tx);line-height:1.2;}
+.dwp-preview-kpi-sub{font-size:11px;color:var(--mu);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dwp-preview-graph{background:var(--sur);border:0.5px solid var(--brd);border-radius:8px;padding:10px;position:relative;height:160px;}
+.dwp-preview-graph canvas{display:block;width:100%!important;height:100%!important;}
+.dwp-preview-placeholder{display:flex;align-items:center;justify-content:center;padding:24px 12px;font-size:11px;color:var(--mu);text-align:center;background:var(--sur);border:0.5px dashed var(--brd2);border-radius:8px;}
+.dwp-empty{padding:32px 16px;text-align:center;font-size:12.5px;line-height:1.5;color:var(--mu);border:0.5px dashed var(--brd2);border-radius:10px;}
+body.dwp-cross-drag .dwp-backdrop{pointer-events:none;}
+.dwp-drop-target{outline:2px dashed var(--ac);outline-offset:-2px;border-radius:12px;transition:outline .12s;}
+.dwp-footer{display:flex;align-items:center;justify-content:flex-end;padding:12px 16px;border-top:0.5px solid var(--brd);flex-shrink:0;background:var(--sur);}
+.dwp-reset{background:transparent;border:none;color:var(--ac2);font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer;padding:8px 10px;border-radius:6px;transition:background .12s;}
 .dwp-reset:hover{background:rgba(79,124,255,.10);}
+@media (max-width:640px){
+  .dwp{width:100vw;}
+}
 </style>
 </head>
 <body>
@@ -125,6 +153,7 @@ html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif
       <span>Widgets</span>
     </button>
   </div>
+  <div class="dwp-backdrop" id="dash-widgets-backdrop" onclick="dashCloseWidgetsPopup()"></div>
   <div class="dwp" id="dash-widgets-popup"></div>
   <div class="dash-period-drop-menu" id="dash-period-drop-menu"></div>
   <div class="set-scroll">
@@ -375,6 +404,8 @@ const DASH_GRAPHS = [
 
 const DASH_PALETTE = { blue:'#6e9dff', teal:'#2dd4bf', green:'#22c88a', amber:'#f5a623', red:'#e85555', purple:'#c4b5fd' };
 const dashChartInstances = {};
+const dashPreviewChartInstances = {};
+let dashDwpDragging = null;
 
 if(window.Chart){
   Chart.defaults.font.family = "'DM Sans', sans-serif";
@@ -409,10 +440,11 @@ function dashChartCommonScales(){
   };
 }
 
-function dashChartLine(key, data){
-  const canvas = document.getElementById('dash-chart-' + key); if(!canvas || !window.Chart) return;
-  dashChartDestroy(key);
-  dashChartInstances[key] = new Chart(canvas, {
+function dashChartLine(key, data, targetCanvas){
+  const canvas = targetCanvas || document.getElementById('dash-chart-' + key); if(!canvas || !window.Chart) return;
+  const map = targetCanvas ? dashPreviewChartInstances : dashChartInstances;
+  if(map[key]){ map[key].destroy(); delete map[key]; }
+  map[key] = new Chart(canvas, {
     type:'line',
     data:{ labels:data.labels, datasets:data.datasets.map(function(d){
       return { label:d.label, data:d.data, borderColor:d.color, backgroundColor:d.color+'33',
@@ -427,11 +459,12 @@ function dashChartLine(key, data){
   dashChartHideEmpty(canvas);
 }
 
-function dashChartBar(key, data, opts){
+function dashChartBar(key, data, opts, targetCanvas){
   opts = opts || {};
-  const canvas = document.getElementById('dash-chart-' + key); if(!canvas || !window.Chart) return;
-  dashChartDestroy(key);
-  dashChartInstances[key] = new Chart(canvas, {
+  const canvas = targetCanvas || document.getElementById('dash-chart-' + key); if(!canvas || !window.Chart) return;
+  const map = targetCanvas ? dashPreviewChartInstances : dashChartInstances;
+  if(map[key]){ map[key].destroy(); delete map[key]; }
+  map[key] = new Chart(canvas, {
     type:'bar',
     data:{ labels:data.labels, datasets:data.datasets.map(function(d){
       return { label:d.label, data:d.data, backgroundColor:d.color, borderRadius:4, borderSkipped:false };
@@ -448,10 +481,11 @@ function dashChartBar(key, data, opts){
   dashChartHideEmpty(canvas);
 }
 
-function dashChartDonut(key, data){
-  const canvas = document.getElementById('dash-chart-' + key); if(!canvas || !window.Chart) return;
-  dashChartDestroy(key);
-  dashChartInstances[key] = new Chart(canvas, {
+function dashChartDonut(key, data, targetCanvas){
+  const canvas = targetCanvas || document.getElementById('dash-chart-' + key); if(!canvas || !window.Chart) return;
+  const map = targetCanvas ? dashPreviewChartInstances : dashChartInstances;
+  if(map[key]){ map[key].destroy(); delete map[key]; }
+  map[key] = new Chart(canvas, {
     type:'doughnut',
     data:{ labels:data.labels, datasets:[{ data:data.values, backgroundColor:data.colors, borderColor:getComputedStyle(document.documentElement).getPropertyValue('--sur').trim() || '#ffffff', borderWidth:2 }]},
     options:{ responsive:true, maintainAspectRatio:false, cutout:'65%',
@@ -559,49 +593,46 @@ function dashSeries(n, min, max, seed){
   return out;
 }
 
-function dashDrawGraphs(){
+function dashGraphData(key){
   const p = dashPeriodInfo(DASH_STATE.period);
   const L = p.labels, n = L.length, s = p.seed;
-
-  dashChartLine('activeInventory', {
-    labels:L, datasets:[{ label:'Active', data: dashSeries(n, 280, 380, s+1), color: DASH_PALETTE.blue }]
-  });
-  dashChartLine('assetValueChart', {
-    labels:L, datasets:[{ label:'Value ($k)', data: dashSeries(n, 900, 1650, s+2), color: DASH_PALETTE.teal }]
-  });
-  dashChartDonut('assetSalesCycle', {
-    labels:['New','Active','Sold','Archived'],
-    values: dashSeries(4, 15, 90, s+3),
-    colors:[DASH_PALETTE.blue, DASH_PALETTE.teal, DASH_PALETTE.green, DASH_PALETTE.amber]
-  });
-  dashChartLine('salesChart', {
-    labels:L, datasets:[{ label:'Sales', data: dashSeries(n, 5, 45, s+4), color: DASH_PALETTE.green }]
-  });
-  dashChartBar('purchaseRatio', {
-    labels:L, datasets:[
-      { label:'Purchased', data: dashSeries(n, 8, 30, s+5),  color: DASH_PALETTE.blue },
-      { label:'Available', data: dashSeries(n, 20, 80, s+6), color: DASH_PALETTE.amber }
-    ]
-  }, { stacked:true });
-  dashChartLine('purchaseChart', {
-    labels:L, datasets:[{ label:'Purchases', data: dashSeries(n, 4, 35, s+7), color: DASH_PALETTE.blue }]
-  });
-  dashChartBar('highestSellingChart', {
-    labels:['Sedan','SUV','Truck','Coupe','Hatch'],
-    datasets:[{ label:'Sales', data: dashSeries(5, 12, 68, s+8), color: DASH_PALETTE.teal }]
-  });
-  dashChartBar('salePerfByLocation', {
-    labels:['Houston','Dallas','Austin','Atlanta','Boston','Chicago'],
-    datasets:[{ label:'Sales', data: dashSeries(6, 8, 55, s+9), color: DASH_PALETTE.purple }]
-  });
-  dashChartLine('profitChart', {
-    labels:L, datasets:[{ label:'Profit ($k)', data: dashSeries(n, 20, 180, s+10), color: DASH_PALETTE.green }]
-  });
-  dashChartLine('purchaseSalesAssetChart', {
-    labels:L, datasets:[
-      { label:'Purchase', data: dashSeries(n, 10, 65, s+11), color: DASH_PALETTE.blue },
-      { label:'Sales',    data: dashSeries(n, 8, 55, s+12),  color: DASH_PALETTE.teal }
-    ]
+  switch(key){
+    case 'activeInventory':
+      return { kind:'line', data:{ labels:L, datasets:[{ label:'Active', data: dashSeries(n, 280, 380, s+1), color: DASH_PALETTE.blue }] } };
+    case 'assetValueChart':
+      return { kind:'line', data:{ labels:L, datasets:[{ label:'Value ($k)', data: dashSeries(n, 900, 1650, s+2), color: DASH_PALETTE.teal }] } };
+    case 'assetSalesCycle':
+      return { kind:'donut', data:{ labels:['New','Active','Sold','Archived'], values: dashSeries(4, 15, 90, s+3), colors:[DASH_PALETTE.blue, DASH_PALETTE.teal, DASH_PALETTE.green, DASH_PALETTE.amber] } };
+    case 'salesChart':
+      return { kind:'line', data:{ labels:L, datasets:[{ label:'Sales', data: dashSeries(n, 5, 45, s+4), color: DASH_PALETTE.green }] } };
+    case 'purchaseRatio':
+      return { kind:'bar', data:{ labels:L, datasets:[
+        { label:'Purchased', data: dashSeries(n, 8, 30, s+5),  color: DASH_PALETTE.blue },
+        { label:'Available', data: dashSeries(n, 20, 80, s+6), color: DASH_PALETTE.amber }
+      ] }, opts:{ stacked:true } };
+    case 'purchaseChart':
+      return { kind:'line', data:{ labels:L, datasets:[{ label:'Purchases', data: dashSeries(n, 4, 35, s+7), color: DASH_PALETTE.blue }] } };
+    case 'highestSellingChart':
+      return { kind:'bar', data:{ labels:['Sedan','SUV','Truck','Coupe','Hatch'], datasets:[{ label:'Sales', data: dashSeries(5, 12, 68, s+8), color: DASH_PALETTE.teal }] } };
+    case 'salePerfByLocation':
+      return { kind:'bar', data:{ labels:['Houston','Dallas','Austin','Atlanta','Boston','Chicago'], datasets:[{ label:'Sales', data: dashSeries(6, 8, 55, s+9), color: DASH_PALETTE.purple }] } };
+    case 'profitChart':
+      return { kind:'line', data:{ labels:L, datasets:[{ label:'Profit ($k)', data: dashSeries(n, 20, 180, s+10), color: DASH_PALETTE.green }] } };
+    case 'purchaseSalesAssetChart':
+      return { kind:'line', data:{ labels:L, datasets:[
+        { label:'Purchase', data: dashSeries(n, 10, 65, s+11), color: DASH_PALETTE.blue },
+        { label:'Sales',    data: dashSeries(n, 8, 55, s+12),  color: DASH_PALETTE.teal }
+      ] } };
+  }
+  return null;
+}
+function dashDrawGraphs(){
+  DASH_GRAPHS.forEach(function(g){
+    if(dashHiddenGraphs.has(g.key)) return;
+    const spec = dashGraphData(g.key); if(!spec) return;
+    if(spec.kind === 'line')  dashChartLine(g.key, spec.data);
+    else if(spec.kind === 'bar')   dashChartBar(g.key, spec.data, spec.opts || {});
+    else if(spec.kind === 'donut') dashChartDonut(g.key, spec.data);
   });
 }
 
@@ -646,68 +677,157 @@ function dashSaveHidden(){
 }
 
 function dashOpenWidgetsPopup(e){
-  e.stopPropagation();
-  const pop = document.getElementById('dash-widgets-popup');
+  if(e) e.stopPropagation();
   dashRenderWidgetsPopup();
-  pop.classList.add('show');
-  const btn = e.currentTarget;
-  const r = btn.getBoundingClientRect();
-  const pr = pop.getBoundingClientRect();
-  let top = r.bottom + 4;
-  if(top + pr.height > window.innerHeight - 8){
-    const above = r.top - pr.height - 4;
-    top = (above >= 8) ? above : Math.max(8, window.innerHeight - pr.height - 8);
-  }
-  let left = r.left;
-  if(left + pr.width > window.innerWidth - 8) left = window.innerWidth - pr.width - 8;
-  if(left < 8) left = 8;
-  pop.style.top = top + 'px';
-  pop.style.left = left + 'px';
+  document.getElementById('dash-widgets-popup').classList.add('show');
+  document.getElementById('dash-widgets-backdrop').classList.add('show');
 }
 function dashCloseWidgetsPopup(){
   const pop = document.getElementById('dash-widgets-popup');
+  const bd  = document.getElementById('dash-widgets-backdrop');
   if(pop) pop.classList.remove('show');
+  if(bd)  bd.classList.remove('show');
+  dashDestroyPreviewCharts();
+}
+const DWP_DRAG_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>';
+const DWP_PLUS_SVG  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+const DWP_MINUS_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+function dashKpiPreviewHtml(k){
+  return '<div class="dwp-preview-kpi">' +
+    '<span class="dwp-preview-kpi-icon">' + dashKpiIcon(k.icon) + '</span>' +
+    '<div class="dwp-preview-kpi-body">' +
+      '<div class="dwp-preview-kpi-value">' + k.value + '</div>' +
+      '<div class="dwp-preview-kpi-sub">' + k.title + '</div>' +
+    '</div>' +
+  '</div>';
+}
+function dashGraphPreviewHtml(g){
+  return '<div class="dwp-preview-graph"><canvas class="dwp-preview-canvas" data-preview-key="' + g.key + '"></canvas></div>';
+}
+function dashDestroyPreviewCharts(){
+  Object.keys(dashPreviewChartInstances).forEach(function(k){
+    try { dashPreviewChartInstances[k].destroy(); } catch(_){}
+    delete dashPreviewChartInstances[k];
+  });
+}
+function dashInitPreviewCharts(){
+  dashDestroyPreviewCharts();
+  document.querySelectorAll('#dwp-list .dwp-preview-canvas').forEach(function(canvas){
+    const key = canvas.getAttribute('data-preview-key');
+    const spec = dashGraphData(key); if(!spec) return;
+    if(spec.kind === 'line')       dashChartLine(key, spec.data, canvas);
+    else if(spec.kind === 'bar')   dashChartBar(key, spec.data, spec.opts || {}, canvas);
+    else if(spec.kind === 'donut') dashChartDonut(key, spec.data, canvas);
+  });
+}
+function dashCardHtml(type, key, name, previewHtml){
+  return '<div class="dwp-card" data-type="' + type + '" data-key="' + key + '" draggable="false">' +
+    '<div class="dwp-card-head">' +
+      '<span class="dwp-drag" title="Drag to reorder">' + DWP_DRAG_SVG + '</span>' +
+      '<span class="dwp-card-name">' + name + '</span>' +
+      '<button type="button" class="dwp-card-toggle" onclick="dashToggleWidget(\'' + type + '\',\'' + key + '\')" aria-label="Add widget">' + DWP_PLUS_SVG + '</button>' +
+    '</div>' +
+    '<div class="dwp-card-preview">' + previewHtml + '</div>' +
+  '</div>';
 }
 function dashRenderWidgetsPopup(){
   const pop = document.getElementById('dash-widgets-popup');
-  const CHK = '<span class="dwp-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span>';
-  const itemHtml = function(type, key, name, isOn){
-    return '<button type="button" class="dwp-item" role="menuitemcheckbox" aria-checked="' + (isOn ? 'true' : 'false') + '" data-type="' + type + '" data-key="' + key + '" onclick="dashToggleWidget(\'' + type + '\',\'' + key + '\')">' +
-      CHK + '<span class="dwp-label">' + name + '</span>' +
-    '</button>';
-  };
-  const kpiItems = DASH_KPIS.map(function(k){ return itemHtml('kpi', k.key, k.title, !dashHiddenKpis.has(k.key)); }).join('');
-  const graphItems = DASH_GRAPHS.map(function(g){ return itemHtml('graph', g.key, g.title, !dashHiddenGraphs.has(g.key)); }).join('');
+  if(!pop) return;
+  const kpiCards = DASH_KPIS.filter(function(k){ return dashHiddenKpis.has(k.key); }).map(function(k){
+    return dashCardHtml('kpi', k.key, k.title, dashKpiPreviewHtml(k));
+  }).join('');
+  const graphCards = DASH_GRAPHS.filter(function(g){ return dashHiddenGraphs.has(g.key); }).map(function(g){
+    return dashCardHtml('graph', g.key, g.title, dashGraphPreviewHtml(g));
+  }).join('');
+  const empty = (!kpiCards && !graphCards)
+    ? '<div class="dwp-empty">All widgets are on your dashboard. Click Reset to defaults or remove a widget from the dashboard to add it back here.</div>'
+    : '';
   pop.innerHTML =
-    '<div class="dwp-section">Show / hide</div>' +
-    '<div class="dwp-list">' +
-      kpiItems + graphItems +
-    '</div>' +
+    '<div class="dwp-head"><h3>Widgets</h3><button type="button" class="dwp-close" onclick="dashCloseWidgetsPopup()" aria-label="Close">&#x2715;</button></div>' +
+    '<div class="dwp-section">Show / Hide</div>' +
+    '<div class="dwp-list" id="dwp-list">' + empty + kpiCards + graphCards + '</div>' +
     '<div class="dwp-footer"><button type="button" class="dwp-reset" onclick="dashResetWidgets()">Reset to defaults</button></div>';
+  dashWireDwpDrag();
+  dashInitPreviewCharts();
 }
-function dashSyncWidgetChecks(){
-  document.querySelectorAll('#dash-widgets-popup .dwp-item').forEach(function(btn){
-    const type = btn.getAttribute('data-type');
-    const key  = btn.getAttribute('data-key');
-    const set  = (type === 'kpi') ? dashHiddenKpis : dashHiddenGraphs;
-    btn.setAttribute('aria-checked', set.has(key) ? 'false' : 'true');
+function dashWireDwpDrag(){
+  const cards = document.querySelectorAll('#dwp-list .dwp-card');
+  cards.forEach(function(card){
+    const handle = card.querySelector('.dwp-drag');
+    if(handle){
+      handle.addEventListener('mousedown', function(){ card.draggable = true; });
+      handle.addEventListener('mouseup',   function(){ card.draggable = false; });
+    }
+    card.addEventListener('dragstart', function(e){
+      card.classList.add('dwp-dragging');
+      const type = card.getAttribute('data-type'), key = card.getAttribute('data-key');
+      dashDwpDragging = { type: type, key: key };
+      document.body.classList.add('dwp-cross-drag');
+      try { e.dataTransfer.setData('text/plain', type + ':' + key); } catch(_){}
+      e.dataTransfer.effectAllowed = 'copyMove';
+    });
+    card.addEventListener('dragend', function(){
+      card.classList.remove('dwp-dragging');
+      card.draggable = false;
+      dashDwpDragging = null;
+      document.body.classList.remove('dwp-cross-drag');
+      document.querySelectorAll('#dwp-list .dwp-card.dwp-drag-over').forEach(function(c){ c.classList.remove('dwp-drag-over'); });
+      document.querySelectorAll('.dwp-drop-target').forEach(function(el){ el.classList.remove('dwp-drop-target'); });
+    });
+    card.addEventListener('dragover', function(e){
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      card.classList.add('dwp-drag-over');
+    });
+    card.addEventListener('dragleave', function(){ card.classList.remove('dwp-drag-over'); });
+    card.addEventListener('drop', function(e){
+      e.preventDefault();
+      card.classList.remove('dwp-drag-over');
+      let raw = '';
+      try { raw = e.dataTransfer.getData('text/plain') || ''; } catch(_){}
+      const parts = raw.split(':');
+      if(parts.length !== 2) return;
+      const srcType = parts[0], srcKey = parts[1];
+      const tgtType = card.getAttribute('data-type'), tgtKey = card.getAttribute('data-key');
+      if(srcType !== tgtType || srcKey === tgtKey) return;
+      const arr = (srcType === 'kpi') ? DASH_KPIS : DASH_GRAPHS;
+      const si = arr.findIndex(function(x){ return x.key === srcKey; });
+      const ti = arr.findIndex(function(x){ return x.key === tgtKey; });
+      if(si < 0 || ti < 0) return;
+      const moved = arr.splice(si, 1)[0];
+      arr.splice(ti, 0, moved);
+      if(srcType === 'kpi') dashSaveKpiOrder(); else dashSaveGraphOrder();
+      dashApply();
+      setTimeout(dashRenderWidgetsPopup, 60);
+    });
   });
 }
 function dashToggleWidget(type, key){
   const set = (type === 'kpi') ? dashHiddenKpis : dashHiddenGraphs;
   if(set.has(key)) set.delete(key); else set.add(key);
   dashSaveHidden();
-  const pop = document.getElementById('dash-widgets-popup');
-  if(pop && pop.classList.contains('show')) dashSyncWidgetChecks(); else dashRenderWidgetsPopup();
   dashApply();
+  const pop = document.getElementById('dash-widgets-popup');
+  if(pop && pop.classList.contains('show')){
+    setTimeout(dashRenderWidgetsPopup, 60);
+  }
 }
 function dashResetWidgets(){
   dashHiddenKpis.clear();
   dashHiddenGraphs.clear();
   dashSaveHidden();
-  dashSyncWidgetChecks();
   dashApply();
+  const pop = document.getElementById('dash-widgets-popup');
+  if(pop && pop.classList.contains('show')){
+    setTimeout(dashRenderWidgetsPopup, 60);
+  }
 }
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){
+    const pop = document.getElementById('dash-widgets-popup');
+    if(pop && pop.classList.contains('show')) dashCloseWidgetsPopup();
+  }
+});
 function dashToggleKebab(e, type, key){
   if(e) e.stopPropagation();
   const id = 'w-menu-' + type + '-' + key;
@@ -720,8 +840,8 @@ function dashHideWidget(type, key){
   set.add(key);
   dashSaveHidden();
   const pop = document.getElementById('dash-widgets-popup');
-  if(pop && pop.classList.contains('show')) dashSyncWidgetChecks();
   dashApply();
+  if(pop && pop.classList.contains('show')) setTimeout(dashRenderWidgetsPopup, 60);
 }
 document.addEventListener('click', function(ev){
   document.querySelectorAll('.w-menu.open').forEach(function(m){
@@ -729,21 +849,6 @@ document.addEventListener('click', function(ev){
     if(parent && !parent.contains(ev.target)) m.classList.remove('open');
   });
 });
-document.addEventListener('click', function(e){
-  const pop = document.getElementById('dash-widgets-popup');
-  if(!pop || !pop.classList.contains('show')) return;
-  if(e.target.closest && e.target.closest('#dash-widgets-btn')) return;
-  const r = pop.getBoundingClientRect();
-  if(e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) return;
-  dashCloseWidgetsPopup();
-});
-window.addEventListener('scroll', function(e){
-  const pop = document.getElementById('dash-widgets-popup');
-  if(pop && pop.classList.contains('show') && !(e.target && e.target.nodeType === 1 && e.target.closest && e.target.closest('#dash-widgets-popup'))){
-    dashCloseWidgetsPopup();
-  }
-}, true);
-window.addEventListener('resize', dashCloseWidgetsPopup);
 
 function dashApply(){
   window.__dashState = Object.assign({}, DASH_STATE);
@@ -755,6 +860,53 @@ dashLoadOrder();
 dashLoadRange();
 dashUpdateCalLabel();
 dashApply();
+
+function dashWireDwpDropTargets(){
+  [{id:'dash-kpi-grid',type:'kpi'},{id:'dash-graphs-grid',type:'graph'}].forEach(function(spec){
+    const grid = document.getElementById(spec.id); if(!grid) return;
+    grid.addEventListener('dragover', function(e){
+      if(!dashDwpDragging || dashDwpDragging.type !== spec.type) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      grid.classList.add('dwp-drop-target');
+    });
+    grid.addEventListener('dragleave', function(e){
+      if(e.target === grid) grid.classList.remove('dwp-drop-target');
+    });
+    grid.addEventListener('drop', function(e){
+      if(!dashDwpDragging || dashDwpDragging.type !== spec.type) return;
+      e.preventDefault();
+      grid.classList.remove('dwp-drop-target');
+      const key = dashDwpDragging.key;
+      const arr = (spec.type === 'kpi') ? DASH_KPIS : DASH_GRAPHS;
+      const hidden = (spec.type === 'kpi') ? dashHiddenKpis : dashHiddenGraphs;
+      let insertIdx = arr.length;
+      const kids = Array.prototype.slice.call(grid.querySelectorAll('.widget'));
+      for(let i=0;i<kids.length;i++){
+        const r = kids[i].getBoundingClientRect();
+        if(e.clientY < r.top + r.height/2){
+          const k = kids[i].getAttribute('data-key');
+          insertIdx = arr.findIndex(function(x){ return x.key === k; });
+          if(insertIdx < 0) insertIdx = arr.length;
+          break;
+        }
+      }
+      const cur = arr.findIndex(function(x){ return x.key === key; });
+      if(cur >= 0 && cur !== insertIdx){
+        const item = arr.splice(cur, 1)[0];
+        if(insertIdx > cur) insertIdx--;
+        arr.splice(insertIdx, 0, item);
+        if(spec.type === 'kpi') dashSaveKpiOrder(); else dashSaveGraphOrder();
+      }
+      hidden.delete(key);
+      dashSaveHidden();
+      dashApply();
+      const pop = document.getElementById('dash-widgets-popup');
+      if(pop && pop.classList.contains('show')) setTimeout(dashRenderWidgetsPopup, 60);
+    });
+  });
+}
+dashWireDwpDropTargets();
 </script>
 
 </body>
