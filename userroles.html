@@ -12,6 +12,8 @@
 html,body{background:#0f1117;margin:0;padding:0;font-family:'DM Sans',sans-serif;}
 .root.main-area{height:calc(100vh - 64px);min-height:0;overflow:hidden;display:flex;flex-direction:column;}
 @media (max-width:640px){ .root.main-area{height:auto;min-height:0;overflow:visible;} }
+.ur-row{cursor:pointer;transition:background .12s;}
+.ur-row:hover td{background:var(--sur2);}
 </style>
 </head>
 <body>
@@ -425,8 +427,8 @@ function urRender(){
   const visible = UR_ROLES.filter(function(r){ return !q || r.name.toLowerCase().includes(q); });
   document.getElementById('ur-tbody').innerHTML = visible.length
     ? visible.map(function(r){
-        return '<tr>' +
-          '<td style="text-align:left;padding-left:24px;"><a class="us-user-link" href="javascript:void(0)" onclick="urOpenEdit(' + r.id + ')">' + urEsc(r.name) + '</a></td>' +
+        return '<tr class="ur-row" onclick="urOpenEdit(' + r.id + ')">' +
+          '<td style="text-align:left;padding-left:24px;"><a class="us-user-link" href="javascript:void(0)">' + urEsc(r.name) + '</a></td>' +
           '<td style="text-align:center;">' + urEsc(r.created) + '</td>' +
         '</tr>';
       }).join('')
